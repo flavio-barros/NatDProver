@@ -13,8 +13,8 @@ Edge_Metatable = { __index = Edge }
 
 --- Class Constructor
 function Edge:new (label, origem, destino)
-   assert( getmetatable(origem) == Node_Metatable , "Edge:new expects a Node. Origem is not a node.")
-   assert( getmetatable(destino) == Node_Metatable , "Edge:new expects a Node. Destino is not a node.")
+   assert( getmetatable(origem) == Node_Metatable , "Edge:new expects a Node. Origin is not a node.")
+   assert( getmetatable(destino) == Node_Metatable , "Edge:new expects a Node. Destination is not a node.")
    assert( type(label) == "string" , "Edge:new expects a string." )
    
    local ini = {}

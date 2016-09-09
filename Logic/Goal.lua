@@ -1,9 +1,9 @@
 ------------------------------------------------------------------------------
---   Goal Module
+-- Goal Module
 --
---   This module defines ...
+-- This module defines a Goal for an ATP utilizing primarily Natural Deduction.
 --
---   @authors: Vitor
+-- @authors: Vitor, Bernardo
 --
 -------------------------------------------------------------------------------
 
@@ -14,47 +14,25 @@ Goal = {}
 Goal_Metatable = { __index = Goal }
 
 
----   Class Constructor
--- @param leftGoals - Será uma lista de operadores que ele pode expandir na parte esquerda do sequente.
-function Goal:new (sequent, leftGoals, rightGoals)
-   assert( getmetatable(sequent) == Node_Metatable , "Goal:new expects a Node. Sequent is not a node.")	
-   
-   local ini = {}
-   
-   if leftGoals ~= nil and rightGoals ~= nil then
-      assert( type(leftGoals) == "table" , "Goal:new expects a table. leftGoals is not a table.")
-      assert( type(rightGoals) == "table" , "Goal:new expects a table. rightGoals is not a table.")
-      ini = {sequent = sequent, leftGoals = leftGoals, rightGoals = rightGoals}
-   elseif leftGoals ~= nil then
-      assert( type(leftGoals) == "table" , "Goal:new expects a table. leftGoals is not a table.")
-      ini = {sequent = sequent, leftGoals = leftGoals}
-   elseif rightGoals ~= nil then
-      assert( type(rightGoals) == "table" , "Goal:new expects a table. rightGoals is not a table.")
-      ini = {sequent = sequent, rightGoals = rightGoals}
-   else
-      ini = {sequent = sequent}
-   end
-   
-   return setmetatable( ini, Goal_Metatable )
+--- Class Constructor
+-- @param goalsList - Lista de goals para adição ao goal intermediário atual que está sendo criado.
+function Goal:new (goalsList)
+    local ini = {}
+
+    if goalsList ~= nil then
+        assert( type(goalsList) == "table", "Goal:new expects a table. goalsList is not a table")
+        ini = {goalsList = goalsList}
+    end
+
+    return setmetatable( ini, Goal_Metatable )
 end
 
 function Goal:deleteGoal()
-   self.rightGoals = nil
-   self.leftGoals = nil
-   self = nil
+    self.goalsList = nil
+    self = nil
 end
 
---- Return the sequent of the Goal
-function Goal:getSequent()
-   return self.sequent
-end
-
---- Return the left side of the Goal
-function Goal:getLeftSide()
-   return self.leftGoals
-end
-
---- Return the right side of the Goal
-function Goal:getRightSide()
-   return self.rightGoals
+--- Return the list of goals
+function Goal:getGoalsList()
+    return self.goalsList
 end

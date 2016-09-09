@@ -1,0 +1,30 @@
+Mon Aug 29 17:41:31 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Mon Aug 29 17:41:31 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Mon Aug 29 17:41:31 2016 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon Aug 29 17:41:38 2016 INFO inputFormula - alpha: ((q) imp (p)) imp ((q) imp (p))
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq0
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Seq0 ainda tem implicação `a direita.
+Mon Aug 29 17:41:51 2016 INFO applyImplyRightRule - Seq0 was expanded
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq1
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Seq1 ainda tem implicação `a direita.
+Mon Aug 29 17:41:51 2016 INFO applyImplyRightRule - Seq1 was expanded
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq2
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Seq2 ainda tem fórmulas para focar.
+Mon Aug 29 17:41:51 2016 INFO applyFocusRule - Seq2 was expanded
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq3
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Seq3 ainda tem fórmulas para focar.
+Mon Aug 29 17:41:51 2016 INFO applyFocusRule - Seq3 was expanded
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq4
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Focused Formulas - Seq4
+Mon Aug 29 17:41:51 2016 INFO q
+Mon Aug 29 17:41:51 2016 INFO imply0
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Left Expanded Formulas - Seq4
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Seq4 ainda tem fórmulas focada não expandida com imply-left.
+Mon Aug 29 17:41:51 2016 INFO applyImplyLeftRule - Seq4 was expanded
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq6
+Mon Aug 29 17:41:51 2016 INFO isExpandable - Seq6 ainda tem fórmulas para focar.
+Mon Aug 29 17:41:51 2016 INFO applyFocusRule - Seq6 was expanded
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq5
+Mon Aug 29 17:41:51 2016 INFO expandAll - Expanding seq Seq7
+Mon Aug 29 17:41:52 2016 INFO GoalsList:
+Mon Aug 29 17:41:52 2016 INFO expandAll - All sequents expanded!

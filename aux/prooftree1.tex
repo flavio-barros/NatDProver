@@ -1,0 +1,34 @@
+\documentclass[landscape]{article}
+
+\usepackage{color}
+\usepackage{proof}
+\usepackage{qtree}
+
+\begin{document}
+$$
+\infer[\to\mbox{right}-\to_{2}]
+{{{\{\} \vdash_{0} ((q \to_{0}p) \to_{2}(q \to_{1}p)),[]}}}
+{
+\infer[\to\mbox{right}-\to_{1}]
+{{{\{\}, \to_{0} \vdash_{1} [], \to_{1}}}}
+{
+\infer[\mbox{focus}-\to_{0}]
+{{{\{\}, \to_{0},q \vdash_{2} [],p}}}
+{
+\infer[\mbox{focus}-q]
+{{{ \to_{0},q,\{ \to_{0}^{3}\} \vdash_{3} [],p}}}
+{
+\infer[\to\mbox{left}-\to_{0}]
+{{{ \to_{0},q,\{ \to_{0}^{3},q\} \vdash_{4} [],p}}}
+{
+{\color{blue}{{{ \to_{0},q,\{ \to_{0}^{3},q\},( \to_{0}^{4})^{p},(q)^{p} \vdash_{5} [p],q}}}} & \infer[\mbox{focus}-p]
+{{{ \to_{0},q,\{ \to_{0}^{3},q\},p \vdash_{6} [],p}}}
+{
+{\color{blue}{{{ \to_{0},q,p,\{ \to_{0}^{3},q,p\} \vdash_{7} [],p}}}}
+}
+}
+}
+}
+}
+}
+$$\end{document}

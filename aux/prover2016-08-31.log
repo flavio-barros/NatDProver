@@ -1,0 +1,107 @@
+Wed Aug 31 12:52:58 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 12:52:58 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 12:52:58 2016 WARN Logger: changing loglevel from DEBUG to DEBUG
+Wed Aug 31 12:53:02 2016 INFO inputFormula - alpha: ((q) imp (p)) imp ((q) imp (p))
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq0
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Seq0 ainda tem implicação `a direita.
+Wed Aug 31 12:53:05 2016 INFO applyImplyRightRule - Seq0 was expanded
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq1
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Seq1 ainda tem implicação `a direita.
+Wed Aug 31 12:53:05 2016 INFO applyImplyRightRule - Seq1 was expanded
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq2
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Seq2 ainda tem fórmulas para focar.
+Wed Aug 31 12:53:05 2016 INFO applyFocusRule - Seq2 was expanded
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq3
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Seq3 ainda tem fórmulas para focar.
+Wed Aug 31 12:53:05 2016 INFO applyFocusRule - Seq3 was expanded
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq4
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Focused Formulas - Seq4
+Wed Aug 31 12:53:05 2016 INFO imply0
+Wed Aug 31 12:53:05 2016 INFO q
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Left Expanded Formulas - Seq4
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Seq4 ainda tem fórmulas focada não expandida com imply-left.
+Wed Aug 31 12:53:05 2016 INFO applyImplyLeftRule - Seq4 was expanded
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq6
+Wed Aug 31 12:53:05 2016 INFO isExpandable - Seq6 ainda tem fórmulas para focar.
+Wed Aug 31 12:53:05 2016 INFO applyFocusRule - Seq6 was expanded
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq5
+Wed Aug 31 12:53:05 2016 INFO expandAll - Expanding seq Seq7
+Wed Aug 31 12:53:07 2016 INFO GoalsList:
+Wed Aug 31 12:53:07 2016 INFO expandAll - All sequents expanded!
+Wed Aug 31 13:16:53 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 13:16:53 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 13:16:53 2016 WARN Logger: changing loglevel from DEBUG to DEBUG
+Wed Aug 31 14:12:17 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 14:12:17 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 14:12:17 2016 WARN Logger: changing loglevel from DEBUG to DEBUG
+Wed Aug 31 14:12:45 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 14:12:45 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 14:12:45 2016 WARN Logger: changing loglevel from DEBUG to DEBUG
+Wed Aug 31 14:13:47 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 14:13:47 2016 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Aug 31 14:13:47 2016 WARN Logger: changing loglevel from DEBUG to DEBUG
+Wed Aug 31 14:16:27 2016 INFO inputFormula - alpha: (((((A) imp (C)) imp (A)) imp (A)) imp (C)) imp (C)
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq0
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq0 ainda tem implicação `a direita.
+Wed Aug 31 14:16:29 2016 INFO applyImplyRightRule - Seq0 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq1
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq1 ainda tem fórmulas para focar.
+Wed Aug 31 14:16:29 2016 INFO applyFocusRule - Seq1 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq2
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Focused Formulas - Seq2
+Wed Aug 31 14:16:29 2016 INFO imply3
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Left Expanded Formulas - Seq2
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq2 ainda tem fórmulas focada não expandida com imply-left.
+Wed Aug 31 14:16:29 2016 INFO applyImplyLeftRule - Seq2 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq4
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq4 ainda tem fórmulas para focar.
+Wed Aug 31 14:16:29 2016 INFO applyFocusRule - Seq4 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq5
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq3
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq3 ainda tem implicação `a direita.
+Wed Aug 31 14:16:29 2016 INFO applyImplyRightRule - Seq3 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq6
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq6 ainda tem fórmulas para focar.
+Wed Aug 31 14:16:29 2016 INFO applyFocusRule - Seq6 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq7
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Focused Formulas - Seq7
+Wed Aug 31 14:16:29 2016 INFO imply1
+Wed Aug 31 14:16:29 2016 INFO imply3
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Left Expanded Formulas - Seq7
+Wed Aug 31 14:16:29 2016 INFO imply3
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq7 ainda tem fórmulas focada não expandida com imply-left.
+Wed Aug 31 14:16:29 2016 INFO applyImplyLeftRule - Seq7 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq8
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq8 ainda tem implicação `a direita.
+Wed Aug 31 14:16:29 2016 INFO applyImplyRightRule - Seq8 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq9
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq9 ainda tem fórmulas para focar.
+Wed Aug 31 14:16:29 2016 INFO applyFocusRule - Seq9 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq10
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq10 ainda tem fórmulas para focar.
+Wed Aug 31 14:16:29 2016 INFO applyFocusRule - Seq10 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq12
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq12 ainda tem fórmulas para focar.
+Wed Aug 31 14:16:29 2016 INFO applyFocusRule - Seq12 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq11
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq13
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Focused Formulas - Seq13
+Wed Aug 31 14:16:29 2016 INFO imply1
+Wed Aug 31 14:16:29 2016 INFO imply6
+Wed Aug 31 14:16:29 2016 INFO A
+Wed Aug 31 14:16:29 2016 INFO imply3
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Left Expanded Formulas - Seq13
+Wed Aug 31 14:16:29 2016 INFO imply3
+Wed Aug 31 14:16:29 2016 INFO imply1
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq13 ainda tem fórmulas focada não expandida com imply-left.
+Wed Aug 31 14:16:29 2016 INFO applyImplyLeftRule - Seq13 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq15
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq15 ainda tem fórmulas para focar.
+Wed Aug 31 14:16:29 2016 INFO applyFocusRule - Seq15 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq14
+Wed Aug 31 14:16:29 2016 INFO isExpandable - Seq14 ainda tem implicação `a direita.
+Wed Aug 31 14:16:29 2016 INFO applyImplyRightRule - Seq14 was expanded
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq16
+Wed Aug 31 14:16:29 2016 INFO expandAll - Expanding seq Seq17
+Wed Aug 31 14:16:29 2016 INFO GoalsList:
+Wed Aug 31 14:16:29 2016 INFO expandAll - All sequents expanded!

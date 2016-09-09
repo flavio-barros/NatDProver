@@ -3,21 +3,21 @@
 --
 --  This module defines ...
 --
---  @author: Vitor, Marcela, Hermann, Jefferson
+--  @author: Vitor, Marcela, Hermann, Jefferson, Bernardo
 --
 -------------------------------------------------------------------------------
 
-require 'UI/ConstantsForLove'
+require 'ConstantsForLove'
 require 'Util/utility'
-require 'Logic/SequentCalculusLogic'
-require 'UI/ParseInput'
+require 'Logic/NaturalDeductionLogic'
+require 'ParseInput'
 require 'logging.file'
 require 'io' 
 
 -- Variáveis globais do modulo
 local logger, font
-local SequentGraph, seqNode, nodeExpanding
-local isDragging, isChoosingFocus, isExpandingFormula
+local NatDGraph, natDNode, nodeExpanding
+local isDragging, isExpandingFormula
 local FPSCAP = 60
 local text, input_formula, input_command = ""
 local editingState = NoInputing
@@ -236,8 +236,8 @@ end
 --- Esta função verifica se algum vertice foi clicado pelo usuário e retorna este vertice.
 local function getNodeClicked() 
    -- Varrer todo o grafo procurando o vertice que pode ter sido clicado.
-   nodes = SequentGraph:getNodes()      
-   for i=1, #nodes do                   
+   nodes = NatDGraph:getNodes()
+   for i=1, #nodes do
       x,y = nodes[i]:getPosition()
       
       if (love.mouse.getX() <= x + raioDoVertice) and (love.mouse.getX() >= x - raioDoVertice) then
@@ -248,17 +248,17 @@ local function getNodeClicked()
          end
       end
    end
-   return nil   
+   return nil
 end
 
 -- Event actions functions
 
 local function proofStarted()
    local ret = false
-   if (SequentGraph ~= nil) then
-      if (SequentGraph:getNode(lblNodeGG) ~= nil) then
-         if (SequentGraph:getNode(lblNodeGG):getEdgesOut() ~= nil) and
-            (#SequentGraph:getNode(lblNodeGG):getEdgesOut() ~= 0) then
+   if (NatDGraph ~= nil) then
+      if (NatDGraph:getNode(lblNodeGG) ~= nil) then
+         if (NatDGraph:getNode(lblNodeGG):getEdgesOut() ~= nil) and
+            (#NatDGraph:getNode(lblNodeGG):getEdgesOut() ~= 0) then
             ret = true
          end
       end
@@ -268,8 +268,8 @@ end
 
 local function expandAll()
    if proofStarted() then
-      local graph = LogicModule.expandAll(SequentGraph)                    
-      SequentGraph= prepareGraphToDraw(graph)
+      local graph = LogicModule.expandAll(NatDGraph)                    
+      NatDGraph = prepareGraphToDraw(graph)
    end
 end
 
@@ -279,8 +279,8 @@ local function inputFormula()
    text = "Type your formula or choose an example below: "
    input_formula = ""
    
-   SequentGraph = LogicModule.createGraphFromTable("empty")
-   prepareGraphToDraw(SequentGraph)
+   NatDGraph = LogicModule.createGraphFromTable("empty")
+   prepareGraphToDraw(NatDGraph)
 end
 
 local function runInput()
@@ -290,8 +290,8 @@ local function runInput()
    local t_mimp_formula = implicational(t_formula)
    logger:info("inputFormula - alpha: "..convert_formula_tostring(t_mimp_formula))
    
-   SequentGraph = LogicModule.createGraphFromTable(t_mimp_formula)
-   prepareGraphToDraw(SequentGraph)  
+   NatDGraph = LogicModule.createGraphFromTable(t_mimp_formula)
+   prepareGraphToDraw(NatDGraph)
 end
 
 local function inputCommand()
@@ -308,23 +308,23 @@ local function runCommand()
    input_command = input_command:gsub(",\" ", ",\"")   
    
    loadstring(input_command)()
-   SequentGraph = LogicModule.getGraph()
-   prepareGraphToDraw(SequentGraph)
+   NatDGraph = LogicModule.getGraph()
+   prepareGraphToDraw(NatDGraph)
    inputCommand()
 end
 
 local function expandFormula()
    if proofStarted() then
       if (nodeExpanding ~= nil) then
-         local ret, graph = LogicModule.expandNode(SequentGraph, seqNode, nodeExpanding)                    
-         SequentGraph= prepareGraphToDraw(graph)
+         local ret, graph = LogicModule.expandNode(NatDGraph, natDNode, nodeExpanding)                    
+         NatDGraph = prepareGraphToDraw(graph)
       end
    end
 end
 
-local function printProof()   
+local function printProof()
    if proofStarted() then
-      ret = LogicModule.printProof(SequentGraph)
+      ret = LogicModule.printProof(NatDGraph)
 
       if ret then
          os.showProofOnBrowser()
@@ -335,7 +335,8 @@ end
 -- Events functions
 
 local function showInputTextEvent()
-   love.graphics.clear()
+   -- Mudança necessária para Löve 0.10. Sem ela, o fundo ficava preto
+   love.graphics.clear(love.graphics.getBackgroundColor())
    font = love.graphics.newFont(12)
 
    love.graphics.setColor(0, 0, 255)
@@ -352,7 +353,8 @@ local function showInputTextEvent()
       i = i + 1
    end
 
-   dofile("Test/data")   
+   --dofile("Test/data")
+   assert(love.filesystem.load("Test/data"))()
 end
 
 local function expandAllButtonEvent()
@@ -362,7 +364,7 @@ local function expandAllButtonEvent()
    local yLen = 40
    
    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then    
-      if love.mouse.isDown("l") then
+      if love.mouse.isDown(leftMouseButton) then
          expandAll()
          love.timer.sleep(buttonTime)
       end
@@ -378,8 +380,7 @@ local function expandAllButtonEvent()
    love.graphics.setColor(255, 255, 255)
    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-   love.graphics.setColor(0, 0, 200)
-   love.graphics.printf(expandAllButtonName, xPos + 28, yPos + 5, 0, "center")
+   love.graphics.printf({{0, 0, 0}, expandAllButtonName}, xPos, yPos + 5, xLen, "center")
 end
 
 local function inputFormulaButtonEvent()
@@ -389,7 +390,7 @@ local function inputFormulaButtonEvent()
    local yLen = 40  
    
    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then     
-      if love.mouse.isDown("l") then
+      if love.mouse.isDown(leftMouseButton) then
          inputFormula()
          love.timer.sleep(buttonTime)
       end
@@ -405,8 +406,7 @@ local function inputFormulaButtonEvent()
    love.graphics.setColor(255, 255, 255)
    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-   love.graphics.setColor(0, 0, 200)
-   love.graphics.printf(inputFormulaButtonName, xPos + 28, yPos + 5, 0, "center")
+   love.graphics.printf({{0, 0, 0}, inputFormulaButtonName}, xPos, yPos + 5, xLen, "center")
 end
 
 local function expandFormulaButtonEvent()
@@ -416,7 +416,8 @@ local function expandFormulaButtonEvent()
    local yLen = 40
 
    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then     
-      if love.mouse.isDown("l") then         
+      if love.mouse.isDown(leftMouseButton) then  
+         -- TODO remover a referência a focus?       
          isChoosingFocus = true
          love.timer.sleep(buttonTime*2)         
       end                        
@@ -433,8 +434,7 @@ local function expandFormulaButtonEvent()
    love.graphics.setColor(255, 255, 255)
    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-   love.graphics.setColor(0, 0, 200)
-   love.graphics.printf(expandFormulaButtonName, xPos + 28, yPos + 5, 0, "center")
+   love.graphics.printf({{0, 0, 0}, expandFormulaButtonName}, xPos, yPos + 5, xLen, "center")
 end
 
 local function printProofButtonEvent()
@@ -443,7 +443,7 @@ local function printProofButtonEvent()
    local xLen = 55
    local yLen = 40
    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
-      if love.mouse.isDown("l") then
+      if love.mouse.isDown(leftMouseButton) then
          printProof()                                   
          love.timer.sleep(buttonTime)
       end
@@ -459,8 +459,7 @@ local function printProofButtonEvent()
    love.graphics.setColor(255, 255, 255)
    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-   love.graphics.setColor(0, 0, 200)
-   love.graphics.printf(printProofButtonName, xPos + 28, yPos + 5, 0, "center")
+   love.graphics.printf({{0, 0, 0}, printProofButtonName}, xPos, yPos + 5, xLen, "center")
 end
 
 --- Esta função é chamada pela love.draw.
@@ -473,17 +472,17 @@ end
 -- o foco (no do tipo Sequent) estiver definido.
 local function dragNodeOrScreenOrSelectFocusEvent()     
 
-   if love.mouse.isDown("l") and isChoosingFocus then
+   -- TODO remover a parte do focus?
+   if love.mouse.isDown(leftMouseButton) and isChoosingFocus then
 
-      seqNode = getNodeClicked()
+      natDNode = getNodeClicked()
       
-      if seqNode then
-         isChoosingFocus = false
+      if natDNode then
          isExpandingFormula = true
          love.timer.sleep(2*buttonTime)    
-      end               
+      end
       
-   elseif love.mouse.isDown("l") and isExpandingFormula then
+   elseif love.mouse.isDown(leftMouseButton) and isExpandingFormula then
 
       nodeExpanding = getNodeClicked()
       
@@ -493,7 +492,8 @@ local function dragNodeOrScreenOrSelectFocusEvent()
       end
       
    end
-   if love.mouse.isDown("l") and not isDragging then            
+
+   if love.mouse.isDown(leftMouseButton) and not isDragging then            
 
       nodeMoving = getNodeClicked()
       isDragging = true
@@ -503,18 +503,18 @@ local function dragNodeOrScreenOrSelectFocusEvent()
       -- Mudar o xInicial e o yInicial sempre que o mouse parar tb seria uma boa!
 
       -- Vericia se o usuário quer arrastar a tela      
-   elseif not love.mouse.isDown("l") then                               
+   elseif not love.mouse.isDown(leftMouseButton) then                               
       isDragging = false
       nodeMoving = "nao vazio"
       
       -- Usuario arrastando um vertice  
    elseif nodeMoving ~= "nao vazio" and nodeMoving ~= nil then
       nodeMoving:setPosition(love.mouse.getX(), love.mouse.getY())
-      --applyForces(SequentGraph)
+      --applyForces(NatDGraph)
       
-      -- Usuario arrastando toda a tela 
+    -- Usuario arrastando toda a tela 
    elseif nodeMoving == nil then        
-      nodes = SequentGraph:getNodes()
+      nodes = NatDGraph:getNodes()
       for i=1, #nodes do                        
          x,y = nodes[i]:getPosition()
          deslocamentoX = math.abs(love.mouse.getX() - xInitial)/10
@@ -612,6 +612,7 @@ function love.load(arg)
    love.graphics.setColor(0, 0, 0) -- Black Color
    font = love.graphics.newFont(11)
    isDragging = false
+   -- TODO remover a referência a focus?
    isChoosingFocus = false
    isExpandingFormula = false
 
@@ -625,11 +626,10 @@ function love.draw()
    inputFormulaButtonEvent()
    expandFormulaButtonEvent()    
    printProofButtonEvent()            
-   drawGraphEvent(SequentGraph)
+   drawGraphEvent(NatDGraph)
    dragNodeOrScreenOrSelectFocusEvent()         
 end
 
 function graph()
-   drawGraphEvent(SequentGraph)
+   drawGraphEvent(NatDGraph)
 end
-

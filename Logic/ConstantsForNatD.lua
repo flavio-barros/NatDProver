@@ -1,0 +1,66 @@
+-------------------------------------------------------------------------------
+--   Constants for Natural Deduction Module
+--
+--   Contains all the constants used by the Natural Deduction Logic Module.
+--
+--   @authors: Vitor, Jefferson, Bernardo
+--
+-------------------------------------------------------------------------------
+
+-- Operators definitions
+opAnd = {}
+opAnd.tex = '\\land'
+opAnd.print = '&'
+opAnd.graph = "and"
+
+opOr = {}
+opOr.tex = '\\lor' 
+opOr.print = '|'
+opOr.graph = "or"
+
+opImp = {}
+opImp.tex = '\\to'
+opImp.print = '->'
+opImp.graph = "imply"
+
+opNot = {}
+opNot.tex = '\\neg'
+opNot.print = '~'
+opNot.graph = "not"
+
+lblBot = {}
+lblBot.tex = '\\bot'
+lblBot.print = 'Bottom'
+lblBot.graph = "bot"
+
+operators = {} -- Tabela que contém todos os operadores
+operators[1] = opAnd
+operators[2] = opOr
+operators[3] = opImp
+operators[4] = opNot
+
+-- Labels for graph definitions
+lblEdgeEsq = "left"
+lblEdgeDir = "right"
+lblEdgeDeducao = "DED"
+lblEdgeGoal = "Goal"
+lblEdgeCounterModel = "COUNTER"
+lblEdgeAccessability = "Access"
+lblEdgeSatisfy = "sat"
+lblEdgeUnsatisfy = "unsat"
+lblFormulaReference = "ref"
+
+lblNodeGG = "GG"
+lblNodeEsq = "e"
+lblNodeDir = "d"
+lblNodeWorld = "w"
+
+lblRuleImplyLeft = "REMOVER IMPLY LEFT"
+lblRuleImplyRight = "REMOVER IMPLY RIGHT"
+lblRuleImplyIntro = "impIntro"
+lblRuleImplyElim = "impElim"
+lblRuleRestart = "restart"
+
+-- Side definitions
+leftSide = "Left"
+rightSide = "Right"

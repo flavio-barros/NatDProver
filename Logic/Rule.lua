@@ -1,9 +1,9 @@
 -------------------------------------------------------------------------------
---   This module defines a Rule.
+--	This module defines a Rule.
 --
---   @author: Jefferson
+--	@author: Jefferson, Bernardo
 -------------------------------------------------------------------------------
-require "SequentGraph.lua"
+require "NatDGraph.lua"
 
 
 Rule = {name = ""}
@@ -12,28 +12,23 @@ Rule = {name = ""}
 -- Rule constructor
 
 function Rule:new (o)
-   o = o or {}
-   setmetatable(o, self)
-   self.__index = self 
-   return o
-end
-
-function Rule:setSequent(seq)
-   self.sequent = seq
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self 
+	return o
 end
 
 function Rule:setFormula(form)
-   self.formula = form
+	self.formula = form
 end
 
 
 
-
-ImpLeft = Rule:new {name = "-->-Left"}
+ImpIntro = Rule:new {name = "-->-Intro"}
+ImpElim = Rule:new {name = "-->-Elim"}
 
 function ImpLeft:apply()
-   print(self.name)
-   print(self.sequent)
-   print(self.formula)
+	print(self.name)
+	print(self.formula)
 end
 
