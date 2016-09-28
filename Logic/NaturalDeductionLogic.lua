@@ -27,6 +27,7 @@ local counterModel = nil
 local foundNodes = {}
 local nstep = 0
 local sufix = 0
+local dischargeable = {}
 
 -- Private functions
 
@@ -129,6 +130,8 @@ local function generateNewGoal(natDNode)
 	local newGoal = nil
 	local j = 1
 
+	-- TODO assim, há apenas uma lista com os goals possíveis.
+	-- Verificar se não é necessário uma lista de subgoals
 	if edgesOut ~= nil then
 		for k, _ in pairs(edgesOut) do
 			for i = 1, #edgesOut[k] do
@@ -144,7 +147,7 @@ local function generateNewGoal(natDNode)
 		end
 	end
 	
-	newGoal = Goal:new (natDNode, goalsList)
+	newGoal = Goal:new(natDNode, goalsList)
 					 
 	return newGoal
 end
@@ -204,8 +207,8 @@ local function createGraphFormula(formula_tabela, letters)
 		local EdgeDir = NatDEdge:new(lblEdgeDir, NodeImp, S2.root)
 
 		nodes = {NodeImp}
-		edges = {EdgeEsq,EdgeDir}
-		print("oi")
+		edges = {EdgeEsq, EdgeDir}
+
 		FormulaGraph:addNodes(S1.nodes)
 		FormulaGraph:addNodes(S2.nodes)
 		FormulaGraph:addNodes(nodes)
@@ -225,11 +228,9 @@ local function createGraphNatD(form_table, letters)
 	local NatDGraph = Graph:new()
 	local S,L
 	local NodeGG = NatDNode:new(lblNodeGG)
-	local NodeEsq = NatDNode:new(lblNodeEsq)
-	local NodeDir = NatDNode:new(lblNodeDir)
 	S,L = createGraphFormula(form_table, letters)
 
-	local newEdge = NatDEdge:new('', NodeGG, S.root)
+	local newEdge = NatDEdge:new(lblRootEdge, NodeGG, S.root)
 
 	local nodes = {NodeGG}
 	NatDGraph:addNodes(nodes)
@@ -349,13 +350,14 @@ end
 local function printFormula(formulaNode, shortedFormula)
 	local ret = ""
 	local edge, subformula = nil
-	
+
 	if shortedFormula == nil then shortedFormula = true end
 		
 	local formulaNumber = formulaNode:getLabel():sub(6,formulaNode:getLabel():len())
 	local formulaNumberCopied = nil
 	
 	local originalFormula = formulaNode:getInformation("originalFormula")
+
 	if originalFormula ~= nil then
 		formulaNumber = originalFormula:getLabel():sub(6,formulaNode:getLabel():len())
 		formulaNumberCopied = formulaNode:getLabel():sub(6,formulaNode:getLabel():len())
@@ -365,6 +367,7 @@ local function printFormula(formulaNode, shortedFormula)
 		if not shortedFormula then
 			for i, edge in ipairs(formulaNode:getEdgesOut()) do
 				if edge:getLabel() == lblEdgeEsq then
+					print("oi esq")
 					subformula = edge:getDestino()
 					ret = ret.."("..printFormula(subformula, shortedFormula)
 				end
@@ -380,20 +383,22 @@ local function printFormula(formulaNode, shortedFormula)
 		if not shortedFormula then
 			for i, edge in ipairs(formulaNode:getEdgesOut()) do
 				if edge:getLabel() == lblEdgeDir then
+					print("oi dir")	
 					subformula = edge:getDestino()
 					ret = ret..printFormula(subformula, shortedFormula)..")"
 				end
 			end
 		end	
+	else -- atômico
+		ret = ret..formulaNode:getLabel()
 	end
 
 	return ret
-
 end
 
 local function printSequent(natDNode, file, pprintAll)
 	local ret = ""
-	local edge, nodeEsq, nodeDir = nil
+	local edge, nodeMain, nodeEsq, nodeDir = nil
 	local deductions = {}
 	local j = 1
 	local rule = ""
@@ -403,13 +408,13 @@ local function printSequent(natDNode, file, pprintAll)
 
 		if tonumber(natDNode:getLabel():sub(4)) == 8 then
 			local x = 10
-		end			 
+		end
 
-		
 		local seqNumber = natDNode:getLabel():sub(4,natDNode:getLabel():len())
-		if seqNumber == "0" then shortedFormula = false end
-		
-		for i, edge in ipairs(natDNode:getEdgesOut()) do		 
+		if seqNumber == "1" then shortedFormula = false end
+
+		for i, edge in ipairs(natDNode:getEdgesOut()) do
+
 			if edge:getLabel() == lblEdgeEsq then
 				nodeEsq = edge:getDestino()
 			end
@@ -421,9 +426,9 @@ local function printSequent(natDNode, file, pprintAll)
 				deductions[j] = seqDed
 				rule = edge:getInformation("rule")
 				j = j+1
-			end						  
+			end  
 		end
-	  
+
 		if not natDNode:getInformation("wasPrinted") or pprintAll then		  
 			if #deductions > 0 then
 				file:write("\\infer["..rule.."]\n")
@@ -431,28 +436,29 @@ local function printSequent(natDNode, file, pprintAll)
 
 			if natDNode:getInformation("isAxiom") then
 				file:write("{\\color{blue}{")
-			else				
+			else
 				file:write("{")
 			end
 
 			if natDNode:getInformation("isProved") ~= nil and not natDNode:getInformation("isProved") then
 				file:write("{\\color{red}{")
-			else				
+			else
 				file:write("{")
 			end
 
 			if natDNode:getInformation("repetition") then
 				file:write("{\\color{green}{")
-			else				
+			else
 				file:write("{")
-			end			 
-			
+			end
+--[[
 			if nodeEsq ~= nil then
 				for i, edge in ipairs(nodeEsq:getEdgesOut()) do
+					print("oiEsq")
 					local formula = printFormula(edge:getDestino(), shortedFormula)
 
 					if edge:getInformation("reference") ~= nil then
-						local atomicReference = edge:getInformation("reference")						
+						local atomicReference = edge:getInformation("reference")
 						formula = "("..formula..")^{"..edge:getInformation("reference"):getLabel().."}"
 					end
 
@@ -467,8 +473,12 @@ local function printSequent(natDNode, file, pprintAll)
 			for i, edge in ipairs(nodeDir:getEdgesOut()) do
 				ret = ret..printFormula(edge:getDestino(), shortedFormula)
 				ret = ret..","
-			end		 
-			ret = ret:sub(1, ret:len()-1)	  
+			end
+			ret = ret:sub(1, ret:len()-1)
+]]
+			ret = ret..printFormula(natDNode, false)
+			ret = ret..","
+			ret = ret:sub(1, ret:len()-1)
 
 			file:write(ret)
 			if natDNode:getInformation("isAxiom") then
@@ -534,7 +544,7 @@ local function printSequent(natDNode, file, pprintAll)
 				end
 			end			
 		end
-				
+
 		natDNode:setInformation("wasPrinted", true)
 	end
 end
@@ -984,16 +994,16 @@ local function applyImplyLeftRule(natDNode, formulaNode)
 	local newBracketsEdge = NatDEdge:new("1", nodeRight1, newNodeBrackets)
 	graph:addEdge(newBracketsEdge)
 
-	-- 1.2. Put A (from A \to B) on the right.
+	-- 1.2. Put A (from A → B) on the right.
 	local newEdgeDir = NatDEdge:new("0", nodeRight1, formulaNode:getEdgeOut(lblEdgeEsq):getDestino())	
 	graph:addEdge(newEdgeDir)
 	
 	-- 2. Create right premiss sequent:
 	
-	-- 2.1. Leave A \to B on the left
+	-- 2.1. Leave A → B on the left
 	local listEdgesOut = nodeLeft2:getEdgesOut()
 
-	-- 2.2. Add B (from A \to B) on the left outside focus
+	-- 2.2. Add B (from A → B) on the left outside focus
 	local newFocusNode = createBracketOrFocus(lblNodeFocus, NewNatDNode2)
 
 	local newEdgeSequent = NatDEdge:new("0", nodeLeft2, newFocusNode)

@@ -21,7 +21,7 @@ opOr.graph = "or"
 opImp = {}
 opImp.tex = '\\to'
 opImp.print = '->'
-opImp.graph = "imply"
+opImp.graph = "imp"
 
 opNot = {}
 opNot.tex = '\\neg'
@@ -40,6 +40,7 @@ operators[3] = opImp
 operators[4] = opNot
 
 -- Labels for graph definitions
+lblRootEdge = "root"
 lblEdgeEsq = "left"
 lblEdgeDir = "right"
 lblEdgeDeducao = "DED"
