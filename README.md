@@ -6,7 +6,7 @@ NatDProver is a theorem prover for Propositional Minimal Logic. In current devel
 Installation
 ============
 
-SequentProver depends on the following libraries (listed with the versions I'm using):
+NatDProver depends on the following libraries (listed with the versions I'm using):
 
 * love (0.7.2)
 * luasocket (3.0rc1-1)
@@ -22,7 +22,7 @@ Lpeg is a pattern-matching library for Lua. We use lpeg to parse input formulae 
 Usage
 =====
 
-Inside SequentProver directory:
+Inside NatDProver directory:
 
 1. Run the prover graphical interface
 
