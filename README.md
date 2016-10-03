@@ -1,7 +1,7 @@
 Description
 ===========
 
-SequentProver is a theorem prover for Propositional Minimal Logic. In current development it implements only the implication connective. 
+NatDProver is a theorem prover for Propositional Minimal Logic. In current development it implements only the implication connective. 
 
 Installation
 ============
@@ -28,11 +28,7 @@ Inside SequentProver directory:
 
 `love .`
 
-2. Run the input terminal
-
-`lua inputServer.lua`
-
-3. Follow commands in the graphical interface
+2. Follow commands in the graphical interface
 
 Input formula example
 =====================
