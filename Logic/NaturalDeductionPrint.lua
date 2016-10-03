@@ -16,6 +16,8 @@ require "Util/utility"
 
 PrintModule = {}
 
+-- Funções Locais
+
 local function printFormula(formulaNode, shortedFormula)
 	local ret = ""
 	local edge, subformula = nil
@@ -77,8 +79,8 @@ local function printProofStep(natDNode, file, pprintAll)
 			local x = 10
 		end
 
-		local seqNumber = natDNode:getLabel():sub(4,natDNode:getLabel():len())
-		if seqNumber == "1" then shortedFormula = false end
+		local stepNumber = natDNode:getLabel():sub(4,natDNode:getLabel():len())
+		if stepNumber == "1" then shortedFormula = false end
 
 		for i, edge in ipairs(natDNode:getEdgesOut()) do
 
@@ -89,8 +91,8 @@ local function printProofStep(natDNode, file, pprintAll)
 				nodeDir = edge:getDestino()
 			end
 			if edge:getLabel() == lblEdgeDeducao then
-				local seqDed = edge:getDestino()
-				deductions[j] = seqDed
+				local stepDed = edge:getDestino()
+				deductions[j] = stepDed
 				rule = edge:getInformation("rule")
 				j = j+1
 			end  
@@ -164,13 +166,9 @@ local function printProofStep(natDNode, file, pprintAll)
 				file:write("}}")
 			else				
 				file:write("}")
-			end			  
-
-			--serializedSequent = serializedSequent..ret.." "  
+			end
 
 			if #deductions > 0 then
-				--serializedSequent = serializedSequent:sub(1, serializedSequent:len()-1)
-				--serializedSequent = serializedSequent.."|"
 				file:write("\n{\n")
 
 				for i, edge in ipairs(deductions) do					
@@ -216,6 +214,13 @@ local function printProofStep(natDNode, file, pprintAll)
 	end
 end
 
+-- Função pública
+
+-- Função principal do módulo. Chama a função recursiva printProofStep.
+-- @param agraph Grafo da prova.
+-- @param nameSufix Sufixo para identificação da prova.
+-- @param pprintAll Indicador de que a prova será toda impressa.
+-- @return Uma string com a prova em LaTeX.
 function PrintModule.printProof(agraph, nameSufix, pprintAll)
 	graph = agraph
 
@@ -237,10 +242,6 @@ function PrintModule.printProof(agraph, nameSufix, pprintAll)
 		file:write("$$\n")
 
 		printProofStep(step, file, pprintAll)
-		
-		--logger:info("statistics -- Serialized sequent: "..serializedSequent)  
-		--logger:info("statistics -- Size of serialized sequent: "..serializedSequent:len())  
-		--countGraphElements()
 
 		file:write("\n$$")	
 		file:write("\\end{document}\n")

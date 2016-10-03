@@ -240,7 +240,7 @@ local function createGraphNatD(form_table, letters)
 	NatDGraph:addEdges(edges)
 	NatDGraph:addEdges(S.edges)
 
-	goalsList={}
+	goalsList = {}
 	goalsList[NodeGG:getLabel()] = {goal = generateNewGoal(NodeGG), weight = 1}
 
 	return NatDGraph
@@ -376,22 +376,17 @@ local function degreeOfFormula(formulaNode)
 end
 
 local function compareFormulasDegree(formulaA, formulaB)
-  
-	local countFormulaA, countFormulaB
+	local countFormulaA = degreeOfFormula(formulaA)
+	local countFormulaB = degreeOfFormula(formulaB)
 
-	countFormulaA = degreeOfFormula(formulaA)
-	countFormulaB = degreeOfFormula(formulaB)
-
-  return countFormulaB > countFormulaA
+	return countFormulaB > countFormulaA
 end
 
 local function compareEdgesInBracket(edgeA, edgeB)
-
 	local posA = tonumber(edgeA:getLabel())
 	local posB = tonumber(edgeB:getLabel())
 
 	return posA > posB
-	
 end
 
 local function compareSequentsFormulas(sideSeq, sideSeqParent)
@@ -829,7 +824,7 @@ end
 local function applyImplyRightRule(natDNode, formulaNode)
 	logger:debug("ImplyRight: Expanding "..natDNode:getLabel().. " and formula "..formulaNode:getLabel())
 	
-	local NewNatDNode, seqListNodes, seqListEdges=createNewSequent(natDNode)
+	local NewNatDNode, seqListNodes, seqListEdges = createNewSequent(natDNode)
 
 	graph:addNodes(seqListNodes)
 	graph:addEdges(seqListEdges)
