@@ -324,7 +324,7 @@ end
 
 local function printProof()
    if proofStarted() then
-      ret = LogicModule.printProof(NatDGraph)
+      ret = PrintModule.printProof(NatDGraph)
 
       if ret then
          os.showProofOnBrowser()
