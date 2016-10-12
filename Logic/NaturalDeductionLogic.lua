@@ -818,7 +818,7 @@ local function applyImplyLeftRule(natDNode, formulaNode)
 	natDNode:setInformation("isExpanded", true)
 	logger:info("applyImplyLeftRule - "..natDNode:getLabel().." was expanded")
 
-	return graph		
+	return graph	
 end
 
 local function applyImplyRightRule(natDNode, formulaNode)
@@ -914,7 +914,7 @@ function LogicModule.createGraphFromTable(form_table)
 
 	return graph
 end
-
+	
 --- Expand a operator in a sequent.
 --- For a specific graph and a node of that graph, it expands the node if that node is an operator.
 --- The operator node is only expanded if a sequent node were previusly selected.
@@ -935,8 +935,9 @@ function LogicModule.expandNode(agraph, natDNode, formulaNode)
 	return true, graph		
 end
 
+-- TODO aqui aplicar todos os implyintro e implyelim
 function LogicModule.expandAll(agraph, pstep, natDNode)
-
+--[[
 	local isAllExpanded = true
 	local k, goalEntry
 
@@ -1020,7 +1021,7 @@ function LogicModule.expandAll(agraph, pstep, natDNode)
 		logger:info("expandAll - All sequents expanded!")
 		ret = true
 	end
-
+]]
 	return graph, ret 
 end
 

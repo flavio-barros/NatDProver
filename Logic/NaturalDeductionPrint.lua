@@ -65,7 +65,7 @@ local function printFormula(formulaNode, shortedFormula)
 	return ret
 end
 
-local function printProofStep(natDNode, file, pprintAll)
+local function printProofStep(natDNode, file, printAll)
 	local ret = ""
 	local edge, nodeMain, nodeEsq, nodeDir = nil
 	local deductions = {}
@@ -98,7 +98,7 @@ local function printProofStep(natDNode, file, pprintAll)
 			end  
 		end
 
-		if not natDNode:getInformation("wasPrinted") or pprintAll then		  
+		if not natDNode:getInformation("wasPrinted") or printAll then		  
 			if #deductions > 0 then
 				file:write("\\infer["..rule.."]\n")
 			end
@@ -172,7 +172,7 @@ local function printProofStep(natDNode, file, pprintAll)
 				file:write("\n{\n")
 
 				for i, edge in ipairs(deductions) do					
-					printProofStep(deductions[i], file, pprintAll)
+					printProofStep(deductions[i], file, printAll)
 					if #deductions > 1 and i < #deductions then
 						file:write(" & ")
 					end					  
@@ -196,7 +196,7 @@ local function printProofStep(natDNode, file, pprintAll)
 						close = true
 					end
 					
-					printProofStep(deductions[i], file, pprintAll)
+					printProofStep(deductions[i], file, printAll)
 					if #deductions > 1 and i < #deductions then
 						-- file:write(" & ")
 					end
@@ -219,9 +219,9 @@ end
 -- Função principal do módulo. Chama a função recursiva printProofStep.
 -- @param agraph Grafo da prova.
 -- @param nameSufix Sufixo para identificação da prova.
--- @param pprintAll Indicador de que a prova será toda impressa.
+-- @param printAll Indicador de que a prova será toda impressa (booleano).
 -- @return Uma string com a prova em LaTeX.
-function PrintModule.printProof(agraph, nameSufix, pprintAll)
+function PrintModule.printProof(agraph, nameSufix, printAll)
 	graph = agraph
 
 	if nameSufix == nil then nameSufix = "" end
@@ -241,7 +241,7 @@ function PrintModule.printProof(agraph, nameSufix, pprintAll)
 		file:write("\\begin{document}\n")
 		file:write("$$\n")
 
-		printProofStep(step, file, pprintAll)
+		printProofStep(step, file, printAll)
 
 		file:write("\n$$")	
 		file:write("\\end{document}\n")

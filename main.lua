@@ -329,7 +329,17 @@ local function printProof()
       if ret then
          os.showProofOnBrowser()
       end
-   end  
+   end
+end
+
+local function implyElimStep()
+    if proofStarted() then
+        ret = LogicModule.(NatDGraph)
+    end
+end
+
+local function implyIntroStep()
+
 end
 
 -- Events functions
@@ -438,28 +448,80 @@ local function expandFormulaButtonEvent()
 end
 
 local function printProofButtonEvent()
-   local xPos = windowWidth - 60
-   local yPos = 140
-   local xLen = 55
-   local yLen = 40
-   if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
-      if love.mouse.isDown(leftMouseButton) then
-         printProof()                                   
-         love.timer.sleep(buttonTime)
-      end
-      love.graphics.setColor(100, 100, 200)
-   else
-      love.graphics.setColor(0, 100, 200)
-   end
-   love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
-   love.graphics.setColor(0, 0, 255)
-   love.graphics.setLineStyle("smooth")
-   love.graphics.line(xPos, yPos, xPos, yPos + yLen)
-   love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
-   love.graphics.setColor(255, 255, 255)
-   love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
-   love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-   love.graphics.printf({{0, 0, 0}, printProofButtonName}, xPos, yPos + 5, xLen, "center")
+    local xPos = windowWidth - 60
+    local yPos = 140
+    local xLen = 55
+    local yLen = 40
+    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
+        if love.mouse.isDown(leftMouseButton) then
+            printProof()                                   
+            love.timer.sleep(buttonTime)
+        end
+        love.graphics.setColor(100, 100, 200)
+    else
+        love.graphics.setColor(0, 100, 200)
+    end
+    love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
+    love.graphics.setColor(0, 0, 255)
+    love.graphics.setLineStyle("smooth")
+    love.graphics.line(xPos, yPos, xPos, yPos + yLen)
+    love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
+    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
+    love.graphics.printf({{0, 0, 0}, printProofButtonName}, xPos, yPos + 5, xLen, "center")
+end
+
+-- Para testes.
+local function implyElimStepButtonEvent()
+    local xPos = windowWidth - 60
+    local yPos = 185
+    local xLen = 55
+    local yLen = 40
+    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
+        if love.mouse.isDown(leftMouseButton) then
+            implyElimStep()                                   
+            love.timer.sleep(buttonTime)
+        end
+        love.graphics.setColor(100, 100, 200)
+    else
+        love.graphics.setColor(0, 100, 200)
+    end
+    love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
+    love.graphics.setColor(0, 0, 255)
+    love.graphics.setLineStyle("smooth")
+    love.graphics.line(xPos, yPos, xPos, yPos + yLen)
+    love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
+    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
+    love.graphics.printf({{0, 0, 0}, "ImpElim Step"}, xPos, yPos + 5, xLen, "center")
+end
+
+-- Para testes.
+local function implyIntroStepButtonEvent()
+    local xPos = windowWidth - 60
+    local yPos = 230
+    local xLen = 55
+    local yLen = 40
+    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
+        if love.mouse.isDown(leftMouseButton) then
+            implyIntroStep()                                   
+            love.timer.sleep(buttonTime)
+        end
+        love.graphics.setColor(100, 100, 200)
+    else
+        love.graphics.setColor(0, 100, 200)
+    end
+    love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
+    love.graphics.setColor(0, 0, 255)
+    love.graphics.setLineStyle("smooth")
+    love.graphics.line(xPos, yPos, xPos, yPos + yLen)
+    love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
+    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
+    love.graphics.printf({{0, 0, 0}, "ImpIntro Step"}, xPos, yPos + 5, xLen, "center")
 end
 
 --- Esta função é chamada pela love.draw.
@@ -625,7 +687,9 @@ function love.draw()
    expandAllButtonEvent()
    inputFormulaButtonEvent()
    expandFormulaButtonEvent()    
-   printProofButtonEvent()            
+   printProofButtonEvent()
+   implyElimStepButtonEvent()
+   implyIntroStepButtonEvent()          
    drawGraphEvent(NatDGraph)
    dragNodeOrScreenOrSelectFocusEvent()         
 end
