@@ -334,7 +334,7 @@ end
 
 local function implyElimStep()
     if proofStarted() then
-        ret = LogicModule.(NatDGraph)
+        ret = ""
     end
 end
 
