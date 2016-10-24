@@ -145,7 +145,7 @@ function Graph:addEdges(edges)
    
    posInicial = #self.edges
    for i=1, #edges do
-      assert( getmetatable(edges[i]) == Edge_Metatable , "Graph:addEdges expects a edge")
+      assert( getmetatable(edges[i]) == Edge_Metatable , "Graph:addEdges expects an edge")
       self.edges[posInicial + i] = edges[i]
    end
 end

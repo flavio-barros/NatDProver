@@ -28,6 +28,10 @@ local counterModel = nil
 local foundNodes = {}
 local nstep = 0
 local sufix = 0
+
+-- Lista das hipóteses a serem descartadas.
+-- Uma hipótese é um predicado lógico. Na prática, essa lista contém os
+-- nós do grafo da prova.
 local dischargeable = {}
 
 -- Private functions
@@ -860,8 +864,33 @@ local function applyImplyRightRule(natDNode, formulaNode)
 	return graph	  
 end
 
+-- Aplica a regra de introdução da implicação no nó selecionado, adicionando um elemento à lista
+-- de hipóteses para descarte posterior.
 local function applyImplyIntroRule(formulaNode)
-	-- TODO
+	logger:debug("ImplyIntro: Expanding "..formulaNode:getLabel())
+
+	local impLeft = formulaNode:getEdgeOut(lblEdgeEsq):getDestino()
+	local impRight = formulaNode:getEdgeOut(lblEdgeDir):getDestino()
+
+	local introStepNode = NatDNode:new(lblRuleImpIntro)
+	local introStepEdge = NatDEdge:new(lblEdgeDeduction, formulaNode, introStepNode)
+	local hypothesisEdge = NatDEdge:new(lblEdgeHypothesis, introStepNode, impLeft)
+	local predicateEdge = NatDEdge:new(lblEdgePredicate, introStepNode, impRight)
+
+	introStepEdge:setInformation("rule", opImp.tex.." - \\mbox{intro}".."_{"..formulaNode:getLabel():sub(6,formulaNode:getLabel():len()).."}")
+
+	local newEdges = {introStepEdge, hypothesisEdge, predicateEdge}
+
+	graph:addNode(introStepNode)
+	graph:addEdges(newEdges)
+
+	formulaNode:setInformation("isExpanded", true)
+
+	logger:info("applyImplyIntroRule - "..formulaNode:getLabel().." was expanded")	
+
+	table.insert(dischargeable, impLeft)
+
+	return graph
 end
 
 local function applyImplyElimRule(natDNode, formulaNode)
@@ -878,7 +907,23 @@ local function applyImplyElimRule(natDNode, formulaNode)
 
 	newEdge1:setInformation("rule", opImp.tex.."\\mbox{right}-"..opImp.tex.."_{"..formulaNode:getLabel():sub(6,formulaNode:getLabel():len()).."}")		
 	
+	-- TODO continuar
+end
 
+--- Expand a operator in a sequent.
+--- For a specific graph and a node of that graph, it expands the node if that node is an operator.
+--- The operator node is only expanded if a sequent node were previusly selected.
+--- @param agraph
+--- @param formulaNode 
+function LogicModule.expandImplyIntroRule(agraph, formulaNode)
+	local typeOfNode = formulaNode:getInformation("type")
+
+	graph = agraph
+	if typeOfNode == opImp.graph then
+		impIntro(formulaNode)
+	end
+
+	return true, graph	
 end
 
 local function applyImplyRule(natDNode, formulaNode)
@@ -1205,11 +1250,11 @@ end
 
 -- TODO completar
 function impIntro(form)
-	local formNode = findForm(form, lblNodeImp)
+	-- local formNode = findf(form)
 
-	assert(formNode, "Formula was not found to apply ImplyIntro")
+	-- assert(formNode, "Formula was not found to apply ImplyIntro")
 
-	graph = applyImplyIntroRule(formNode)
+	graph = applyImplyIntroRule(form)
 	print_all()
 	clear()
 end

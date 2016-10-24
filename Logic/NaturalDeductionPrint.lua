@@ -67,7 +67,7 @@ end
 
 local function printProofStep(natDNode, file, printAll)
 	local ret = ""
-	local edge, nodeMain, nodeEsq, nodeDir = nil
+	local edge, nodeMain, nodeEsq, nodeDir, nodePred = nil
 	local deductions = {}
 	local j = 1
 	local rule = ""
@@ -86,16 +86,18 @@ local function printProofStep(natDNode, file, printAll)
 
 			if edge:getLabel() == lblEdgeEsq then
 				nodeEsq = edge:getDestino()
-			end
-			if edge:getLabel() == lblEdgeDir then
+			elseif edge:getLabel() == lblEdgeDir then
 				nodeDir = edge:getDestino()
-			end
-			if edge:getLabel() == lblEdgeDeducao then
+			elseif edge:getLabel() == lblEdgeDeduction then
 				local stepDed = edge:getDestino()
 				deductions[j] = stepDed
 				rule = edge:getInformation("rule")
 				j = j+1
-			end  
+			elseif edge:getLabel() == lblEdgeHypothesis then
+				-- TODO ver como printar, se é necessário por aqui. Talvez aqui colocar os parênteses ao redor?
+			elseif edge:getLabel() == lblEdgePredicate then
+				nodePred = edge:getDestino()
+			end
 		end
 
 		if not natDNode:getInformation("wasPrinted") or printAll then		  
@@ -121,23 +123,15 @@ local function printProofStep(natDNode, file, printAll)
 				file:write("{")
 			end
 --[[
-			if nodeEsq ~= nil then
-				for i, edge in ipairs(nodeEsq:getEdgesOut()) do
-					print("oiEsq")
-					local formula = printFormula(edge:getDestino(), shortedFormula)
+			if nodePred ~= nil then
+				local formula = printFormula(nodePred, shortedFormula)
 
-					if edge:getInformation("reference") ~= nil then
-						local atomicReference = edge:getInformation("reference")
-						formula = "("..formula..")^{"..edge:getInformation("reference"):getLabel().."}"
-					end
-
-					ret = ret..formula
-					
-					ret = ret..","
-				end	 
+				ret = ret..formula
+				ret = ret..","
 				ret = ret:sub(1, ret:len()-1)
 			end
-
+]]
+--[[
 			edge = nil
 			for i, edge in ipairs(nodeDir:getEdgesOut()) do
 				ret = ret..printFormula(edge:getDestino(), shortedFormula)
@@ -158,7 +152,7 @@ local function printProofStep(natDNode, file, printAll)
 
 			if natDNode:getInformation("isProved") ~= nil and not natDNode:getInformation("isProved") then
 				file:write("}}")
-			else				
+			else
 				file:write("}")
 			end
 

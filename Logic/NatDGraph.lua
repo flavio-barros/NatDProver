@@ -18,8 +18,8 @@ notNodeCount = 0
 orNodeCount  = 0
 implyNodeCount = 0
 botNodeCount = 0
-esqNodeCount = 0
-dirNodeCount = 0
+impIntroNodeCount = 0
+impElimNodeCount = 0
 
 -- Defining the NatDNode, extends Node
 NatDNode = {}
@@ -47,12 +47,12 @@ function NatDNode:new(labelNode)
 		labelNode = labelNode .. botNodeCount
 		botNodeCount = botNodeCount + 1
 
-	elseif labelNode == lblNodeEsq then
-		labelNode = labelNode .. esqNodeCount
-		esqNodeCount = esqNodeCount + 1
-	elseif labelNode == lblNodeDir then		
-		labelNode = labelNode .. dirNodeCount
-		dirNodeCount = dirNodeCount + 1
+	elseif labelNode == lblRuleImpIntro then		
+		labelNode = labelNode .. impIntroNodeCount
+		impIntroNodeCount = impIntroNodeCount + 1
+	elseif labelNode == lblRuleImpElim then		
+		labelNode = labelNode .. impElimNodeCount
+		impElimNodeCount = impElimNodeCount + 1
 	end
 
 	local newNode = Node:new(labelNode)
@@ -73,9 +73,8 @@ function NatDNode:resetCounters()
 	orNodeCount  = 0
 	implyNodeCount = 0
 	botNodeCount = 0
-	natDNodeCount = 0
-	esqNodeCount = 0
-	dirNodeCount = 0
+	impIntroNodeCount = 0
+	impElimNodeCount = 0
 end
 
 -- Defining the NatDEdge, extends Edge

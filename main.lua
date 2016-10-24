@@ -314,12 +314,12 @@ local function runCommand()
 end
 
 local function expandFormula()
-   if proofStarted() then
-      if (nodeExpanding ~= nil) then
-         local ret, graph = LogicModule.expandNode(NatDGraph, natDNode, nodeExpanding)                    
-         NatDGraph = prepareGraphToDraw(graph)
-      end
-   end
+    if proofStarted() then
+        if (nodeExpanding ~= nil) then
+            local ret, graph = LogicModule.expandNode(NatDGraph, natDNode, nodeExpanding)                    
+            NatDGraph = prepareGraphToDraw(graph)
+        end
+    end
 end
 
 local function printProof()
@@ -333,13 +333,17 @@ local function printProof()
 end
 
 local function implyElimStep()
-    if proofStarted() then
-        ret = ""
-    end
+
 end
 
+-- Função que encapsula a função correspondente do módulo NaturalDeductionLogic:
+-- LogicModule.expantImplyIntroRule(grafo, nó selecionado para expansão)
 local function implyIntroStep()
-
+    if (nodeExpanding ~= nil) or (natDNode ~= nil) then
+        
+        local ret, graph = LogicModule.expandImplyIntroRule(NatDGraph, natDNode)           
+        NatDGraph = prepareGraphToDraw(graph)
+    end
 end
 
 -- Events functions
@@ -535,7 +539,7 @@ end
 local function dragNodeOrScreenOrSelectFocusEvent()     
 
    -- TODO remover a parte do focus?
-   if love.mouse.isDown(leftMouseButton) and isChoosingFocus then
+   --[[if love.mouse.isDown(leftMouseButton) and isChoosingFocus then
 
       natDNode = getNodeClicked()
       
@@ -553,7 +557,12 @@ local function dragNodeOrScreenOrSelectFocusEvent()
          expandFormula()
       end
       
-   end
+   end]]
+    if love.mouse.isDown(leftMouseButton) then
+
+        natDNode = getNodeClicked()
+        nodeExpanding = getNodeClicked()
+    end
 
    if love.mouse.isDown(leftMouseButton) and not isDragging then            
 
