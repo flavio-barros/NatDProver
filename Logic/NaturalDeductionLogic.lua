@@ -872,6 +872,7 @@ local function applyImplyIntroRule(formulaNode)
 	local impLeft = formulaNode:getEdgeOut(lblEdgeEsq):getDestino()
 	local impRight = formulaNode:getEdgeOut(lblEdgeDir):getDestino()
 
+	-- Nós e arestas novos.
 	local introStepNode = NatDNode:new(lblRuleImpIntro)
 	local introStepEdge = NatDEdge:new(lblEdgeDeduction, formulaNode, introStepNode)
 	local hypothesisEdge = NatDEdge:new(lblEdgeHypothesis, introStepNode, impLeft)
@@ -893,28 +894,41 @@ local function applyImplyIntroRule(formulaNode)
 	return graph
 end
 
-local function applyImplyElimRule(natDNode, formulaNode)
-	logger:debug("ImplyElim: Expanding "..natDNode:getLabel().. " and formula "..formulaNode:getLabel())
+local function applyImplyElimRule(formulaNode)
+	logger:debug("ImplyElim: Expanding "..formulaNode:getLabel())
 
-	local NewNatDNode, natDListNodes, natDListEdges = createNewSequent(natDNode)
+	-- TODO depois modificar para não pegar sempre o primeiro
+	-- TODO remover da lista de hipóteses?
+	-- TODO verificar se há pelo menos alguma hipótese a ser utilizada (método auxiliar
+	local hypothesisNode = dischargeable[1]
 
-	graph:addNodes(seqListNodes)
-	graph:addEdges(seqListEdges)
+	-- Nós e arestas novos.
+	local elimStepNode = NatDNode:new(lblRuleImpElim)
+	-- TODO Buscar se já existe um nó de A → B no grafo, e utilizar esse cara. Criar um nó
+	-- novo apenas caso necessário (aka não encontrou o nó).
+	local newImpNode = NatDNode:new(opImp.graph)
+	local newImpLeftEdge = NatDEdge:new(lblEdgeEsq, newImpNode, hypothesisNode)
+	local newImpRightEdge = NatDEdge:new(lblEdgeDir, newImpNode, formulaNode)
 
-	local nodeRight = NewNatDNode:getEdgeOut(lblEdgeDir):getDestino()
-	local nodeLeft = NewNatDNode:getEdgeOut(lblEdgeEsq):getDestino()
-	local newEdge1 = NatDEdge:new(lblEdgeDeducao, natDNode, NewNatDNode)
+	local elimStepEdge = NatDEdge:new(lblEdgeDeduction, formulaNode, elimStepNode)
+	local predicateHypEdge = NatDEdge:new(lblEdgePredicate.."1", elimStepNode, hypothesisNode)
+	local predicateImpEdge = NatDEdge:new(lblEdgePredicate.."2", elimStepNode, newImpNode)
 
-	newEdge1:setInformation("rule", opImp.tex.."\\mbox{right}-"..opImp.tex.."_{"..formulaNode:getLabel():sub(6,formulaNode:getLabel():len()).."}")		
-	
-	-- TODO continuar
+	elimStepEdge:setInformation("rule", opImp.tex.." - \\mbox{elim}".."_{"..formulaNode:getLabel():sub(6,formulaNode:getLabel():len()).."}")
+
+	local newNodes = {newImpNode, elimStepNode}
+	local newEdges = {newImpLeftEdge, newImpRightEdge, elimStepEdge, predicateHypEdge, predicateImpEdge}
+
+	graph:addNodes(newNodes)
+	graph:addEdges(newEdges)
+
+	formulaNode:setInformation("isExpanded", true)
+
+	logger:info("applyImplyElimRule - "..formulaNode:getLabel().." was expanded")	
+
+	return graph
 end
 
---- Expand a operator in a sequent.
---- For a specific graph and a node of that graph, it expands the node if that node is an operator.
---- The operator node is only expanded if a sequent node were previusly selected.
---- @param agraph
---- @param formulaNode 
 function LogicModule.expandImplyIntroRule(agraph, formulaNode)
 	local typeOfNode = formulaNode:getInformation("type")
 
@@ -926,19 +940,15 @@ function LogicModule.expandImplyIntroRule(agraph, formulaNode)
 	return true, graph	
 end
 
-local function applyImplyRule(natDNode, formulaNode)
+function LogicModule.expandImplyElimRule(agraph, formulaNode)
+	local typeOfNode = formulaNode:getInformation("type")
 
-	local sideOfOperator = verifySideOfOperator(natDNode, formulaNode)		
+	graph = agraph
+	if typeOfNode == opImp.graph then
+		impElim(formulaNode)
+	end
 
-	if sideOfOperator == leftSide then
-		return applyImplyLeftRule(natDNode, formulaNode)
-	elseif sideOfOperator == rightSide then
-		return applyImplyRightRule(natDNode, formulaNode)
-	elseif sideOfOperator == nil then
-		return nil
-	end			 
-
-	return graph
+	return true, graph	
 end
 
 -- Public functions
@@ -1260,11 +1270,11 @@ function impIntro(form)
 end
 
 function impElim(form)
-	local formNode = findForm(form, lblNodeImp)
+	-- local formNode = findForm(form, lblNodeImp)
 
-	assert(formNode, "Formula was not found to apply ImplyElim")
+	--assert(formNode, "Formula was not found to apply ImplyElim")
 
-	graph = applyImplyElimRule(formNode)
+	graph = applyImplyElimRule(form)
 	print_all()
 	clear()
 end

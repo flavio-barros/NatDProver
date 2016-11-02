@@ -332,8 +332,14 @@ local function printProof()
    end
 end
 
+-- Função que encapsula a função correspondente do módulo NaturalDeductionLogic:
+-- LogicModule.expantImplyElimRule(grafo, nó selecionado para expansão)
 local function implyElimStep()
-
+    if (nodeExpanding ~= nil) or (natDNode ~= nil) then
+        
+        local ret, graph = LogicModule.expandImplyElimRule(NatDGraph, natDNode)           
+        NatDGraph = prepareGraphToDraw(graph)
+    end
 end
 
 -- Função que encapsula a função correspondente do módulo NaturalDeductionLogic:
