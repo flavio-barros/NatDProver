@@ -28,6 +28,8 @@ local counterModel = nil
 local foundNodes = {}
 local nstep = 0
 local sufix = 0
+-- Variável para indexação de descartes de hipótese
+local currentStepNumber = 0
 
 -- Lista das hipóteses a serem descartadas.
 -- Uma hipótese é um predicado lógico. Na prática, essa lista contém os
@@ -878,7 +880,10 @@ local function applyImplyIntroRule(formulaNode)
 	local hypothesisEdge = NatDEdge:new(lblEdgeHypothesis, introStepNode, impLeft)
 	local predicateEdge = NatDEdge:new(lblEdgePredicate, introStepNode, impRight)
 
-	introStepEdge:setInformation("rule", opImp.tex.." - \\mbox{intro}".."_{"..formulaNode:getLabel():sub(6,formulaNode:getLabel():len()).."}")
+	introStepEdge:setInformation("rule", opImp.tex.." - \\mbox{intro}".."_{"..currentStepNumber.."}")
+
+	dischargeable[currentStepNumber] = impLeft
+	currentStepNumber = currentStepNumber + 1
 
 	local newEdges = {introStepEdge, hypothesisEdge, predicateEdge}
 
@@ -888,8 +893,6 @@ local function applyImplyIntroRule(formulaNode)
 	formulaNode:setInformation("isExpanded", true)
 
 	logger:info("applyImplyIntroRule - "..formulaNode:getLabel().." was expanded")	
-
-	table.insert(dischargeable, impLeft)
 
 	return graph
 end
@@ -914,7 +917,9 @@ local function applyImplyElimRule(formulaNode)
 	local predicateHypEdge = NatDEdge:new(lblEdgePredicate.."1", elimStepNode, hypothesisNode)
 	local predicateImpEdge = NatDEdge:new(lblEdgePredicate.."2", elimStepNode, newImpNode)
 
-	elimStepEdge:setInformation("rule", opImp.tex.." - \\mbox{elim}".."_{"..formulaNode:getLabel():sub(6,formulaNode:getLabel():len()).."}")
+	elimStepEdge:setInformation("rule", opImp.tex.." - \\mbox{elim}".."_{"..currentStepNumber.."}")
+
+	currentStepNumber = currentStepNumber + 1
 
 	local newNodes = {newImpNode, elimStepNode}
 	local newEdges = {newImpLeftEdge, newImpRightEdge, elimStepEdge, predicateHypEdge, predicateImpEdge}

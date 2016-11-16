@@ -18,46 +18,29 @@ PrintModule = {}
 
 -- Funções Locais
 
-local function printFormula(formulaNode, shortedFormula)
+local function printFormula(formulaNode)
 	local ret = ""
 	local edge, subformula = nil
 
-	if shortedFormula == nil then shortedFormula = true end
-		
-	local formulaNumber = formulaNode:getLabel():sub(6,formulaNode:getLabel():len())
-	local formulaNumberCopied = nil
-	
-	local originalFormula = formulaNode:getInformation("originalFormula")
+	--if shortedFormula == nil then shortedFormula = true end
 
-	if originalFormula ~= nil then
-		formulaNumber = originalFormula:getLabel():sub(6,formulaNode:getLabel():len())
-		formulaNumberCopied = formulaNode:getLabel():sub(6,formulaNode:getLabel():len())
-	end
-
+	-- Caso tenha nós filhos (implicação).
 	if (formulaNode:getEdgesOut() ~= nil) and (#formulaNode:getEdgesOut() ~= 0) then
-		if not shortedFormula then
-			for i, edge in ipairs(formulaNode:getEdgesOut()) do
-				if edge:getLabel() == lblEdgeEsq then
-					subformula = edge:getDestino()
-					ret = ret.."("..printFormula(subformula, shortedFormula)
-				end
+		for i, edge in ipairs(formulaNode:getEdgesOut()) do
+			if edge:getLabel() == lblEdgeEsq then
+				subformula = edge:getDestino()
+				ret = ret.."("..printFormula(subformula)
 			end
 		end
 
-		if originalFormula ~= nil then
-			ret = ret.." "..opImp.tex.."_{"..formulaNumber.."}^{"..formulaNumberCopied.."}"
-		else
-			ret = ret.." "..opImp.tex.."_{"..formulaNumber.."}"
-		end			
+		ret = ret.." "..opImp.tex.." "
 
-		if not shortedFormula then
-			for i, edge in ipairs(formulaNode:getEdgesOut()) do
-				if edge:getLabel() == lblEdgeDir then
-					subformula = edge:getDestino()
-					ret = ret..printFormula(subformula, shortedFormula)..")"
-				end
+		for i, edge in ipairs(formulaNode:getEdgesOut()) do
+			if edge:getLabel() == lblEdgeDir then
+				subformula = edge:getDestino()
+				ret = ret..printFormula(subformula)..")"
 			end
-		end	
+		end
 	else -- atômico
 		ret = ret..formulaNode:getLabel()
 	end
@@ -67,11 +50,10 @@ end
 
 local function printProofStep(natDNode, file, printAll)
 	local ret = ""
-	local edge, nodeMain, nodeEsq, nodeDir, nodePred = nil
+	local edge, nodeMain, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, nodeHyp = nil
 	local deductions = {}
 	local j = 1
 	local rule = ""
-	local shortedFormula = true
 
 	if natDNode ~= nil then
 
@@ -80,7 +62,6 @@ local function printProofStep(natDNode, file, printAll)
 		end
 
 		local stepNumber = natDNode:getLabel():sub(4,natDNode:getLabel():len())
-		if stepNumber == "1" then shortedFormula = false end
 
 		for i, edge in ipairs(natDNode:getEdgesOut()) do
 
@@ -94,9 +75,18 @@ local function printProofStep(natDNode, file, printAll)
 				rule = edge:getInformation("rule")
 				j = j+1
 			elseif edge:getLabel() == lblEdgeHypothesis then
-				-- TODO ver como printar, se é necessário por aqui. Talvez aqui colocar os parênteses ao redor?
+				-- TODO ver como printar, se é necessário por aqui. Talvez aqui colocar os colchetes ao redor?
+				nodeHyp = edge:getDestino()
+
+			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
 			elseif edge:getLabel() == lblEdgePredicate then
 				nodePred = edge:getDestino()
+
+			-- Na →-Elim, temos duas arestas de predicado, enumeradas.
+			elseif edge:getLabel() == lblEdgePredicate.."1" then
+				nodePred1 = edge:getDestino()
+			elseif edge:getLabel() == lblEdgePredicate.."2" then
+				nodePred2 = edge:getDestino()
 			end
 		end
 
@@ -122,28 +112,55 @@ local function printProofStep(natDNode, file, printAll)
 			else
 				file:write("{")
 			end
---[[
+--[[		
+			if nodeHyp ~= nil then
+				local formula = printFormula(nodeHyp)
+
+				ret = ret.."\\["
+				ret = ret..formula
+				ret = ret.."\\]"
+				-- TODO colocar o índice do descarte e igualá-lo ao da expressão que o descartou.
+				-- TODO criar um contador global de hipóteses descartadas?
+				ret = ret..","
+				ret = ret:sub(1, ret:len()-1)
+			end
+]]
+			local formula = printFormula(natDNode)
+			ret = ret..formula
+
 			if nodePred ~= nil then
-				local formula = printFormula(nodePred, shortedFormula)
+				local formula = printFormula(nodePred)
+
+				ret = ret..formula
+				ret = ret..","
+				ret = ret:sub(1, ret:len()-1)
+			end
+			if nodePred1 ~= nil then
+				local formula = printFormula(nodePred1)
+
+				ret = ret..formula
+				ret = ret..","
+				ret = ret:sub(1, ret:len()-1)
+			end
+			if nodePred2 ~= nil then
+				local formula = printFormula(nodePred2)
+
+				ret = ret..formula
+				ret = ret..","
+				ret = ret:sub(1, ret:len()-1)
+			end
+
+--[[
+			if stepDed ~= nil then
+				local formula = printFormula(stepDed)
 
 				ret = ret..formula
 				ret = ret..","
 				ret = ret:sub(1, ret:len()-1)
 			end
 ]]
---[[
-			edge = nil
-			for i, edge in ipairs(nodeDir:getEdgesOut()) do
-				ret = ret..printFormula(edge:getDestino(), shortedFormula)
-				ret = ret..","
-			end
-			ret = ret:sub(1, ret:len()-1)
-]]
-			ret = ret..printFormula(natDNode, false)
-			ret = ret..","
-			ret = ret:sub(1, ret:len()-1)
-
 			file:write(ret)
+
 			if natDNode:getInformation("isAxiom") then
 				file:write("}}")
 			else				
@@ -165,8 +182,10 @@ local function printProofStep(natDNode, file, printAll)
 			if #deductions > 0 then
 				file:write("\n{\n")
 
-				for i, edge in ipairs(deductions) do					
+				for i, edge in ipairs(deductions) do
+
 					printProofStep(deductions[i], file, printAll)
+
 					if #deductions > 1 and i < #deductions then
 						file:write(" & ")
 					end					  
@@ -191,8 +210,9 @@ local function printProofStep(natDNode, file, printAll)
 					end
 					
 					printProofStep(deductions[i], file, printAll)
+
 					if #deductions > 1 and i < #deductions then
-						-- file:write(" & ")
+						file:write(" & ")
 					end
 
 					if close then
@@ -201,7 +221,7 @@ local function printProofStep(natDNode, file, printAll)
 						close = false
 					end
 				end
-			end			
+			end
 		end
 
 		natDNode:setInformation("wasPrinted", true)
@@ -237,7 +257,7 @@ function PrintModule.printProof(agraph, nameSufix, printAll)
 
 		printProofStep(step, file, printAll)
 
-		file:write("\n$$")	
+		file:write("\n$$")
 		file:write("\\end{document}\n")
 		file:close()
 
