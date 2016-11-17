@@ -5,9 +5,10 @@ Formula{"invalid3-dummet", "((p imp (q)) imp (r)) imp ((((q imp (p)) imp (r))) i
 
 -- Valid formulas:
 Formula{"valid1", "(B imp ((C imp (A)))) imp ((A imp (B)) imp ((A imp (C)) imp ((A imp (C)))))"}
-Formula{"valid2", "(A imp (C)) imp (A imp (C))"}
+Formula{"valid2", "(A imp (B imp (C))) imp (B imp (A imp (C)))"}
 Formula{"valid3", "(q imp (p imp (p))) imp (p imp (q imp (p)))"}
 Formula{"valid4", "(q imp (p)) imp (q imp (p))"}
+Formula{"valid5", "(q imp (p)) imp (p imp (p))"}
 
 -- Chi Formulas: 
 local chi1 = "C"
@@ -23,4 +24,4 @@ local alpha3 = "((((A imp ("..chi3..")) imp (A)) imp (A)) imp ("..chi3..")) imp 
 
 Formula{"invalid5", "A imp ((A imp (p)) imp ((q imp (q)) imp (p)))"}
 Formula{"invalid6", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
-Formula{"invalid7", "A imp ((A imp (t)) imp (((t imp (r)) imp (q imp (r))) imp ((r imp (q)) imp (p))))"}
+--Formula{"invalid7", "A imp ((A imp (t)) imp (((t imp (r)) imp (q imp (r))) imp ((r imp (q)) imp (p))))"}

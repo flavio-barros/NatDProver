@@ -22,18 +22,19 @@ local function printFormula(formulaNode)
 	local ret = ""
 	local edge, subformula = nil
 
-	--if shortedFormula == nil then shortedFormula = true end
-
-	-- Caso tenha nós filhos (implicação).
+	-- Caso tenha nós filhos à esquerda ou à direita (implicação).
 	if (formulaNode:getEdgesOut() ~= nil) and (#formulaNode:getEdgesOut() ~= 0) then
 		for i, edge in ipairs(formulaNode:getEdgesOut()) do
 			if edge:getLabel() == lblEdgeEsq then
 				subformula = edge:getDestino()
-				ret = ret.."("..printFormula(subformula)
+				local printLeft = printFormula(subformula)
+				if printLeft == "" then 
+					ret = ret.."("
+				else
+					ret = ret.."("..printLeft.." "..opImp.tex.." "
+				end
 			end
 		end
-
-		ret = ret.." "..opImp.tex.." "
 
 		for i, edge in ipairs(formulaNode:getEdgesOut()) do
 			if edge:getLabel() == lblEdgeDir then
@@ -42,13 +43,15 @@ local function printFormula(formulaNode)
 			end
 		end
 	else -- atômico
-		ret = ret..formulaNode:getLabel()
+		-- Vale notar que um nó atômico pode ter nós filhos, mas o único caso possível é
+		-- por uma aresta com label lblEdgeDed.
+		ret = ret.." "..formulaNode:getLabel().." "
 	end
 
 	return ret
 end
 
-local function printProofStep(natDNode, file, printAll)
+local function printProofStep(natDNode, file, printAll, currentStepNumber)
 	local ret = ""
 	local edge, nodeMain, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, nodeHyp = nil
 	local deductions = {}
@@ -61,7 +64,7 @@ local function printProofStep(natDNode, file, printAll)
 			local x = 10
 		end
 
-		local stepNumber = natDNode:getLabel():sub(4,natDNode:getLabel():len())
+		local stepNumber = natDNode:getLabel():sub(4, natDNode:getLabel():len())
 
 		for i, edge in ipairs(natDNode:getEdgesOut()) do
 
@@ -128,38 +131,30 @@ local function printProofStep(natDNode, file, printAll)
 			local formula = printFormula(natDNode)
 			ret = ret..formula
 
+			-- →-Intro
 			if nodePred ~= nil then
-				local formula = printFormula(nodePred)
-
-				ret = ret..formula
-				ret = ret..","
-				ret = ret:sub(1, ret:len()-1)
-			end
-			if nodePred1 ~= nil then
+				printProofStep(nodePred, file, printAll, currentStepNumber)
+				file:write(ret)
+			-- →-Elim
+			elseif nodePred1 ~= nil and nodePred2 ~= nil then
 				local formula = printFormula(nodePred1)
 
-				ret = ret..formula
-				ret = ret..","
-				ret = ret:sub(1, ret:len()-1)
-			end
-			if nodePred2 ~= nil then
-				local formula = printFormula(nodePred2)
+				-- TODO verificar se é necessário correção
+				ret = ret.."["..formula.."]".."_{"..currentStepNumber.."}"
+				ret = ret.."\\qquad\\qquad\r"
 
-				ret = ret..formula
-				ret = ret..","
-				ret = ret:sub(1, ret:len()-1)
-			end
+				file:write(ret)
 
---[[
-			if stepDed ~= nil then
-				local formula = printFormula(stepDed)
-
-				ret = ret..formula
-				ret = ret..","
-				ret = ret:sub(1, ret:len()-1)
+				printProofStep(nodePred2, file, printAll, currentStepNumber - 1)
+			-- Nó pai de um nó de dedução
+			elseif stepDed ~= nil then
+				-- TODO ver se isso tá certo (provavelmente não!)
+				printProofStep(stepDed, file, printAll, currentStepNumber - 1)
+				file:write(ret)
+			-- Demais nós
+			else
+				file:write(ret)
 			end
-]]
-			file:write(ret)
 
 			if natDNode:getInformation("isAxiom") then
 				file:write("}}")
@@ -184,7 +179,7 @@ local function printProofStep(natDNode, file, printAll)
 
 				for i, edge in ipairs(deductions) do
 
-					printProofStep(deductions[i], file, printAll)
+					printProofStep(deductions[i], file, printAll, currentStepNumber)
 
 					if #deductions > 1 and i < #deductions then
 						file:write(" & ")
@@ -209,7 +204,7 @@ local function printProofStep(natDNode, file, printAll)
 						close = true
 					end
 					
-					printProofStep(deductions[i], file, printAll)
+					printProofStep(deductions[i], file, printAll, currentStepNumber)
 
 					if #deductions > 1 and i < #deductions then
 						file:write(" & ")
@@ -235,7 +230,7 @@ end
 -- @param nameSufix Sufixo para identificação da prova.
 -- @param printAll Indicador de que a prova será toda impressa (booleano).
 -- @return Uma string com a prova em LaTeX.
-function PrintModule.printProof(agraph, nameSufix, printAll)
+function PrintModule.printProof(agraph, nameSufix, printAll, currentStepNumber)
 	graph = agraph
 
 	if nameSufix == nil then nameSufix = "" end
@@ -255,7 +250,7 @@ function PrintModule.printProof(agraph, nameSufix, printAll)
 		file:write("\\begin{document}\n")
 		file:write("$$\n")
 
-		printProofStep(step, file, printAll)
+		printProofStep(step, file, printAll, currentStepNumber)
 
 		file:write("\n$$")
 		file:write("\\end{document}\n")

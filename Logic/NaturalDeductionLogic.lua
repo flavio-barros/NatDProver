@@ -29,7 +29,10 @@ local foundNodes = {}
 local nstep = 0
 local sufix = 0
 -- Variável para indexação de descartes de hipótese
+-- Também utilizado para indexação das →-Intro
 local currentStepNumber = 0
+-- Contagem das →-Elim
+local elimIndex = 0
 
 -- Lista das hipóteses a serem descartadas.
 -- Uma hipótese é um predicado lógico. Na prática, essa lista contém os
@@ -880,10 +883,11 @@ local function applyImplyIntroRule(formulaNode)
 	local hypothesisEdge = NatDEdge:new(lblEdgeHypothesis, introStepNode, impLeft)
 	local predicateEdge = NatDEdge:new(lblEdgePredicate, introStepNode, impRight)
 
-	introStepEdge:setInformation("rule", opImp.tex.." - \\mbox{intro}".."_{"..currentStepNumber.."}")
-
-	dischargeable[currentStepNumber] = impLeft
 	currentStepNumber = currentStepNumber + 1
+	introStepEdge:setInformation("rule", opImp.tex.." \\mbox{intro}".."_{"..currentStepNumber.."}")
+
+	-- Adiciona a hipótese à lista de hipóteses descartáveis
+	dischargeable[currentStepNumber] = impLeft
 
 	local newEdges = {introStepEdge, hypothesisEdge, predicateEdge}
 
@@ -901,14 +905,12 @@ local function applyImplyElimRule(formulaNode)
 	logger:debug("ImplyElim: Expanding "..formulaNode:getLabel())
 
 	-- TODO depois modificar para não pegar sempre o primeiro
-	-- TODO remover da lista de hipóteses?
-	-- TODO verificar se há pelo menos alguma hipótese a ser utilizada (método auxiliar
-	local hypothesisNode = dischargeable[1]
+	-- TODO verificar se há pelo menos alguma hipótese a ser utilizada (método auxiliar?)
+	local hypothesisNode = dischargeable[currentStepNumber]
+	currentStepNumber = currentStepNumber - 1
 
 	-- Nós e arestas novos.
 	local elimStepNode = NatDNode:new(lblRuleImpElim)
-	-- TODO Buscar se já existe um nó de A → B no grafo, e utilizar esse cara. Criar um nó
-	-- novo apenas caso necessário (aka não encontrou o nó).
 	local newImpNode = NatDNode:new(opImp.graph)
 	local newImpLeftEdge = NatDEdge:new(lblEdgeEsq, newImpNode, hypothesisNode)
 	local newImpRightEdge = NatDEdge:new(lblEdgeDir, newImpNode, formulaNode)
@@ -917,9 +919,8 @@ local function applyImplyElimRule(formulaNode)
 	local predicateHypEdge = NatDEdge:new(lblEdgePredicate.."1", elimStepNode, hypothesisNode)
 	local predicateImpEdge = NatDEdge:new(lblEdgePredicate.."2", elimStepNode, newImpNode)
 
-	elimStepEdge:setInformation("rule", opImp.tex.." - \\mbox{elim}".."_{"..currentStepNumber.."}")
-
-	currentStepNumber = currentStepNumber + 1
+	elimIndex = elimIndex + 1
+	elimStepEdge:setInformation("rule", opImp.tex.." \\mbox{elim}".."_{"..elimIndex.."}")
 
 	local newNodes = {newImpNode, elimStepNode}
 	local newEdges = {newImpLeftEdge, newImpRightEdge, elimStepEdge, predicateHypEdge, predicateImpEdge}
@@ -949,9 +950,8 @@ function LogicModule.expandImplyElimRule(agraph, formulaNode)
 	local typeOfNode = formulaNode:getInformation("type")
 
 	graph = agraph
-	if typeOfNode == opImp.graph then
-		impElim(formulaNode)
-	end
+	
+	impElim(formulaNode)
 
 	return true, graph	
 end
@@ -1308,7 +1308,7 @@ function step(pstep)
 end
 
 function print_all()
-	PrintModule.printProof(graph, "", true)
+	PrintModule.printProof(graph, "", true, #dischargeable)
 	os.showProofOnBrowser()	
 	clear()	
 end

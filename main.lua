@@ -335,8 +335,7 @@ end
 -- Função que encapsula a função correspondente do módulo NaturalDeductionLogic:
 -- LogicModule.expantImplyElimRule(grafo, nó selecionado para expansão)
 local function implyElimStep()
-    if (nodeExpanding ~= nil) or (natDNode ~= nil) then
-        
+    if (nodeExpanding ~= nil) or (natDNode ~= nil) then    
         local ret, graph = LogicModule.expandImplyElimRule(NatDGraph, natDNode)           
         NatDGraph = prepareGraphToDraw(graph)
     end
@@ -346,7 +345,6 @@ end
 -- LogicModule.expantImplyIntroRule(grafo, nó selecionado para expansão)
 local function implyIntroStep()
     if (nodeExpanding ~= nil) or (natDNode ~= nil) then
-        
         local ret, graph = LogicModule.expandImplyIntroRule(NatDGraph, natDNode)           
         NatDGraph = prepareGraphToDraw(graph)
     end
