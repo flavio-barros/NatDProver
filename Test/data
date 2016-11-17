@@ -9,6 +9,7 @@ Formula{"valid2", "(A imp (B imp (C))) imp (B imp (A imp (C)))"}
 Formula{"valid3", "(q imp (p imp (p))) imp (p imp (q imp (p)))"}
 Formula{"valid4", "(q imp (p)) imp (q imp (p))"}
 Formula{"valid5", "(q imp (p)) imp (p imp (p))"}
+Formula{"HermannTest", "(((((a imp (b)) imp (a)) imp (a)) imp (b)) imp (b))"}
 
 -- Chi Formulas: 
 local chi1 = "C"

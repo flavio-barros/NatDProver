@@ -941,6 +941,8 @@ function LogicModule.expandImplyIntroRule(agraph, formulaNode)
 	graph = agraph
 	if typeOfNode == opImp.graph then
 		impIntro(formulaNode)
+	else
+		print("\n\n\nImpIntro deve ser utilizado em implicacoes.\n\n\n")
 	end
 
 	return true, graph	
