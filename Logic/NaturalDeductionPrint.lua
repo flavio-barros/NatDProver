@@ -18,33 +18,36 @@ PrintModule = {}
 
 -- Funções Locais
 
+-- Função que imprime uma fórmula em lógica minimal (atômica ou implicação).
+-- É recursiva, portanto podem haver implicações de implicações etc.
 local function printFormula(formulaNode)
 	local ret = ""
-	local edge, subformula = nil
+	local edge, nodeLeft, nodeRight = nil
 
-	-- Caso tenha nós filhos à esquerda ou à direita (implicação).
-	if (formulaNode:getEdgesOut() ~= nil) and (#formulaNode:getEdgesOut() ~= 0) then
-		for i, edge in ipairs(formulaNode:getEdgesOut()) do
-			if edge:getLabel() == lblEdgeEsq then
-				subformula = edge:getDestino()
-				local printLeft = printFormula(subformula)
-				if printLeft == "" then 
-					ret = ret.."("
-				else
-					ret = ret.."("..printLeft.." "..opImp.tex.." "
-				end
-			end
+	-- Pega os nós da Esquerda e Direita (apenas existentes no caso de explicação).
+	for i, edge in ipairs(formulaNode:getEdgesOut()) do
+		if edge:getLabel() == lblEdgeEsq then
+			nodeLeft = edge:getDestino()
+		elseif edge:getLabel() == lblEdgeDir then
+			nodeRight = edge:getDestino()
 		end
+	end
 
-		for i, edge in ipairs(formulaNode:getEdgesOut()) do
-			if edge:getLabel() == lblEdgeDir then
-				subformula = edge:getDestino()
-				ret = ret..printFormula(subformula)..")"
-			end
+	-- Caso seja um nó de implicação nodeLeft e nodeRight são não nulos.
+	if (nodeLeft ~= nil) and (nodeRight ~= nil) then
+		local printLeft = printFormula(nodeLeft)
+		local printRight = printFormula(nodeRight)
+		ret = ret.."("..printLeft.." "..opImp.tex.." "..printRight..")"
+
+	-- Verificação a fim de evitar imprimir o Label de um nó de Dedução (ImpIntro ou ImpElim).
+	elseif (#formulaNode:getLabel() >= 7) then
+		if (formulaNode:getLabel():sub(1, 7) ~= lblRuleImpIntro:sub(1, 7)) and (formulaNode:getLabel():sub(1, 7) ~= lblRuleImpElim) then
+			-- Nó atômico.
+			-- Vale notar que um nó atômico pode ter nós filhos, mas o único caso possível é
+			-- por uma aresta com label lblEdgeDed.
+			ret = ret.." "..formulaNode:getLabel().." "
 		end
-	else -- atômico
-		-- Vale notar que um nó atômico pode ter nós filhos, mas o único caso possível é
-		-- por uma aresta com label lblEdgeDed.
+	else
 		ret = ret.." "..formulaNode:getLabel().." "
 	end
 
@@ -59,10 +62,6 @@ local function printProofStep(natDNode, file, printAll, currentStepNumber)
 	local rule = ""
 
 	if natDNode ~= nil then
-
-		if tonumber(natDNode:getLabel():sub(4)) == 8 then
-			local x = 10
-		end
 
 		local stepNumber = natDNode:getLabel():sub(4, natDNode:getLabel():len())
 
@@ -146,12 +145,12 @@ local function printProofStep(natDNode, file, printAll, currentStepNumber)
 				file:write(ret)
 
 				printProofStep(nodePred2, file, printAll, currentStepNumber - 1)
-			-- Nó pai de um nó de dedução
+--[[			-- Nó pai de um nó de dedução
 			elseif stepDed ~= nil then
 				-- TODO ver se isso tá certo (provavelmente não!)
 				printProofStep(stepDed, file, printAll, currentStepNumber - 1)
 				file:write(ret)
-			-- Demais nós
+]]			-- Demais nós
 			else
 				file:write(ret)
 			end
