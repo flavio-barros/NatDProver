@@ -689,186 +689,6 @@ local function getInitialNatDNode()
 	end
 end
 
-local function verifyAxiom(natDNode)
-	--local edgesLeft = natDNode:getEdgeOut(lblEdgeEsq):getDestino():getEdgesOut()
-	local rightFormulaNode = natDNode:getEdgeOut(lblEdgeDir):getDestino():getEdgeOut("0"):getDestino()
-	local isAxiom = false
-	
-	if isAxiom then
-		natDNode:setInformation("isAxiom", true)
-		natDNode:setInformation("isExpanded", true)
-		markProvedPath(natDNode)	  
-		return true 
-	else	
-		return false
-	end
-end
-
-local function findFormulaInBracket(nodeBrackets, formulaNode)
-	local formulasInsideBracketEdges = nodeBrackets:getEdgesOut()
-	local posFormulaInBracket = ""
-	local formulaInBracketEdge = nil
-
-	for i=1,#formulasInsideBracketEdges do
-		if formulasInsideBracketEdges[i]:getDestino() == formulaNode then
-			formulaInBracketEdge = formulasInsideBracketEdges[i]
-			posFormulaInBracket = formulasInsideBracketEdges[i]:getLabel()
-			break
-		end
-	end
-
-	return formulaInBracketEdge
-end
-
-local function applyImplyLeftRule(natDNode, formulaNode)
-	logger:debug("ImplyLeft: Expanding sequent "..natDNode:getLabel().. " and formula "..formulaNode:getLabel())
-	
-	local NewNatDNode1, seqListNodes1, seqListEdges1=createNewSequent(natDNode)
-	local NewNatDNode2, seqListNodes2, seqListEdges2=createNewSequent(natDNode)
-
-	graph:addNodes(seqListNodes1)
-	graph:addNodes(seqListNodes2)
-	graph:addEdges(seqListEdges1)
-	graph:addEdges(seqListEdges2)
-	local nodeRight1 = NewNatDNode1:getEdgeOut(lblEdgeDir):getDestino()
-	local nodeLeft1 = NewNatDNode1:getEdgeOut(lblEdgeEsq):getDestino()
-	local nodeRight2 = NewNatDNode2:getEdgeOut(lblEdgeDir):getDestino()
-	local nodeLeft2 = NewNatDNode2:getEdgeOut(lblEdgeEsq):getDestino()
-
-	local newEdge1 = NatDEdge:new(lblEdgeDeducao, natDNode, NewNatDNode1)
-	local newEdge2 = NatDEdge:new(lblEdgeDeducao, natDNode, NewNatDNode2)
-
-	local printFormula = nil
-	if formulaNode:getInformation("originalFormula") then
-		printFormula = formulaNode:getInformation("originalFormula")
-	else
-		printFormula = formulaNode
-	end
-	newEdge1:setInformation("rule", opImp.tex.."\\mbox{left}-"..opImp.tex.."_{"..printFormula:getLabel():sub(6,formulaNode:getLabel():len()).."}")		
-	newEdge2:setInformation("rule", opImp.tex.."\\mbox{left}-"..opImp.tex.."_{"..printFormula:getLabel():sub(6,formulaNode:getLabel():len()).."}")		
-		
-	graph:addEdge(newEdge1)
-	graph:addEdge(newEdge2)
-
-	local nodeFormulaOutsideBrackets = nodeRight1:getEdgeOut("0"):getDestino()
-	graph:removeEdge(nodeRight1:getEdgeOut("0"))
-	
-	local formulasInsideBracketEdges = newNodeBrackets:getEdgesOut()
-	local formulaInBracketEdge = findFormulaInBracket(newNodeBrackets, nodeFormulaOutsideBrackets)
-
-	-- 1. Create left premiss sequent:
-
-	-- 1.0. Put label in non-marked formulas on the left
-	local listEdgesOut = nodeLeft1:getEdgesOut()
-	local numberOfFormulasOnLeft =  #listEdgesOut
-	for i=1, #listEdgesOut do
-		if listEdgesOut[i]:getLabel() ~= "0" then
-			if listEdgesOut[i]:getInformation("reference") == nil then
-				--listEdgesOut[i]:setInformation("reference", nodeFormulaOutsideBrackets)
-			--else
-				local formulaNode = listEdgesOut[i]:getDestino()
-				local newFormulaNode = NatDNode:new(formulaNode:getInformation("type"))
-				newFormulaNode:setInformation("originalFormula", formulaNode)
-				if formulaNode:getEdgeOut(lblEdgeEsq) ~= nil then
-					local newEdgeEsq = NatDEdge:new(lblEdgeEsq, newFormulaNode, formulaNode:getEdgeOut(lblEdgeEsq):getDestino()) 
-					local newEdgeDir = NatDEdge:new(lblEdgeDir, newFormulaNode, formulaNode:getEdgeOut(lblEdgeDir):getDestino())
-
-					graph:addEdge(newEdgeEsq)
-					graph:addEdge(newEdgeDir)					
-				end				
-				graph:addNode(newFormulaNode)
-
-				local newEdgeFormula = NatDEdge:new(""..numberOfFormulasOnLeft, nodeLeft1, newFormulaNode)
-				numberOfFormulasOnLeft = numberOfFormulasOnLeft + 1
-				graph:addEdge(newEdgeFormula)
-				
-				newEdgeFormula:setInformation("reference", nodeFormulaOutsideBrackets)
-			end
-		end
-	end
-	
-	-- 1.1. Put C inside bracket.
-	if formulaInBracketEdge == nil then
-		local newEdgeInsideBrackets = NatDEdge:new(""..contBracketFormulas, newNodeBrackets, nodeFormulaOutsideBrackets)
-		contBracketFormulas = contBracketFormulas + 1
-		graph:addEdge(newEdgeInsideBrackets)
-	end
-	
-	local newBracketsEdge = NatDEdge:new("1", nodeRight1, newNodeBrackets)
-	graph:addEdge(newBracketsEdge)
-
-	-- 1.2. Put A (from A → B) on the right.
-	local newEdgeDir = NatDEdge:new("0", nodeRight1, formulaNode:getEdgeOut(lblEdgeEsq):getDestino())	
-	graph:addEdge(newEdgeDir)
-	
-	-- 2. Create right premiss sequent:
-	
-	-- 2.1. Leave A → B on the left
-	local listEdgesOut = nodeLeft2:getEdgesOut()
-
-	-- 2.2. Add B (from A → B) on the left outside focus
-	local newFocusNode = createBracketOrFocus(lblNodeFocus, NewNatDNode2)
-
-	local newEdgeSequent = NatDEdge:new("0", nodeLeft2, newFocusNode)
-	graph:addEdge(newEdgeSequent)
-	
-	local newEdgeLeft = NatDEdge:new(""..(#nodeLeft2:getEdgesOut()+1), nodeLeft2, formulaNode:getEdgeOut(lblEdgeDir):getDestino()) 
-	graph:addEdge(newEdgeLeft)
-
-	local leftExpandedFormulas = NewNatDNode1:getInformation("leftExpandedFormulas")
-	leftExpandedFormulas:add(formulaNode:getInformation("originalFormula"))
-
-	leftExpandedFormulas = NewNatDNode2:getInformation("leftExpandedFormulas")
-	leftExpandedFormulas:add(formulaNode:getInformation("originalFormula"))	
-	
-	local lweight = goalsList[natDNode:getLabel()].weight
-	goalsList[NewNatDNode1:getLabel()] = {goal = generateNewGoal(NewNatDNode1), weight = lweight}	
-	goalsList[NewNatDNode2:getLabel()] = {goal = generateNewGoal(NewNatDNode2), weight = lweight}
-	natDNode:setInformation("isExpanded", true)
-	logger:info("applyImplyLeftRule - "..natDNode:getLabel().." was expanded")
-
-	return graph	
-end
-
-local function applyImplyRightRule(natDNode, formulaNode)
-	logger:debug("ImplyRight: Expanding "..natDNode:getLabel().. " and formula "..formulaNode:getLabel())
-	
-	local NewNatDNode, seqListNodes, seqListEdges = createNewSequent(natDNode)
-
-	graph:addNodes(seqListNodes)
-	graph:addEdges(seqListEdges)
-	local nodeRight = NewNatDNode:getEdgeOut(lblEdgeDir):getDestino()
-	local nodeLeft = NewNatDNode:getEdgeOut(lblEdgeEsq):getDestino()
-	local newEdge1 = NatDEdge:new(lblEdgeDeducao, natDNode, NewNatDNode)
-
-	newEdge1:setInformation("rule", opImp.tex.."\\mbox{right}-"..opImp.tex.."_{"..formulaNode:getLabel():sub(6,formulaNode:getLabel():len()).."}")		
-	
-	graph:addEdge(newEdge1)		
-
-	local listEdgesOut = nodeRight:getEdgesOut()
-	for i=1, #listEdgesOut do
-		if listEdgesOut[i]:getDestino():getLabel() == formulaNode:getLabel() then
-			labelEdgeRemoved = listEdgesOut[i]:getLabel()
-			graph:removeEdge(listEdgesOut[i])
-			break
-		end
-	end
-	local newEdge2 = NatDEdge:new(labelEdgeRemoved, nodeRight, formulaNode:getEdgeOut(lblEdgeDir):getDestino())
-
-	local numberEdgesLeft = #nodeLeft:getEdgesOut()
-	local newEdge3 = NatDEdge:new(""..numberEdgesLeft, nodeLeft, formulaNode:getEdgeOut(lblEdgeEsq):getDestino())
-
-	graph:addEdge(newEdge2)
-	graph:addEdge(newEdge3)
-
-	local lweight = goalsList[natDNode:getLabel()].weight
-	goalsList[NewNatDNode:getLabel()] = {goal = generateNewGoal(NewNatDNode), weight = lweight}
-	natDNode:setInformation("isExpanded", true)
-	logger:info("applyImplyRightRule - "..natDNode:getLabel().." was expanded")			 
-
-	return graph	  
-end
-
 -- Aplica a regra de introdução da implicação no nó selecionado, adicionando um elemento à lista
 -- de hipóteses para descarte posterior.
 local function applyImplyIntroRule(formulaNode)
@@ -896,11 +716,15 @@ local function applyImplyIntroRule(formulaNode)
 
 	formulaNode:setInformation("isExpanded", true)
 
-	logger:info("applyImplyIntroRule - "..formulaNode:getLabel().." was expanded")	
+	logger:info("applyImplyIntroRule - "..formulaNode:getLabel().." was expanded")
+
+	-- TODO verificar de impRight (que está no topo) já é alguma das hipóteses
+	-- Assim, fecha-se o ramo.
 
 	return graph
 end
 
+-- TODO alterar essa função para receber também a hipótese da esquerda
 local function applyImplyElimRule(formulaNode)
 	logger:debug("ImplyElim: Expanding "..formulaNode:getLabel())
 
@@ -930,7 +754,9 @@ local function applyImplyElimRule(formulaNode)
 
 	formulaNode:setInformation("isExpanded", true)
 
-	logger:info("applyImplyElimRule - "..formulaNode:getLabel().." was expanded")	
+	logger:info("applyImplyElimRule - "..formulaNode:getLabel().." was expanded")
+
+	-- TODO verificar se o newImpNode ou o outro lado estão na lista de hipóteses	
 
 	return graph
 end
@@ -943,6 +769,7 @@ function LogicModule.expandImplyIntroRule(agraph, formulaNode)
 		impIntro(formulaNode)
 	else
 		print("\n\n\nImpIntro deve ser utilizado em implicacoes.\n\n\n")
+		logger:info("WARNING - ImpIntro used on an non-implication node.")
 	end
 
 	return true, graph	
@@ -976,29 +803,9 @@ function LogicModule.createGraphFromTable(form_table)
 
 	return graph
 end
-	
---- Expand a operator in a sequent.
---- For a specific graph and a node of that graph, it expands the node if that node is an operator.
---- The operator node is only expanded if a sequent node were previusly selected.
---- @param agraph 
---- @param natDNode  
---- @param formulaNode 
-function LogicModule.expandNode(agraph, natDNode, formulaNode)
-	local typeOfNode = formulaNode:getInformation("type")
-	
-	graph = agraph
-
-	if not natDNode:getInformation("isExpanded") then
-		if typeOfNode == opImp.graph then					  
-			graph = applyImplyRule(natDNode, formulaNode)  
-		end
-	end
-
-	return true, graph		
-end
 
 -- TODO aqui aplicar todos os implyintro e implyelim
-function LogicModule.expandAll(agraph, pstep, natDNode)
+function LogicModule.expandAll(agraph, natDNode)
 --[[
 	local isAllExpanded = true
 	local k, goalEntry
@@ -1084,6 +891,14 @@ function LogicModule.expandAll(agraph, pstep, natDNode)
 		ret = true
 	end
 ]]
+	-- TODO começar aqui expandindo inicialmente pelas ImpIntro
+
+	-- Começar a prova pelo nó inicial caso não tenha sido dado um nó
+	if natDNode == nil then
+		-- natDNode = graph:getNode
+	end
+
+
 	return graph, ret 
 end
 
@@ -1091,106 +906,74 @@ function LogicModule.getGraph()
 	return graph
 end
 
+-- Função auxiliar recursiva para verificar igualdade de dois nós do grafo.
+-- Adaptada apenas para implicações e termos atômicos, utilizada principalmente
+-- para verificar se uma proposição lógica é uma hipótese a ser descartada.
+-- Essa função é necessária pois podem haver dicersas implicações para um
+-- mesmo par de proposições atômicas.
+-- Exemplo: podemos ter dois nós com label imp0 e imp1, ambos ligados aos nós Q e P,
+-- representando a mesma sentença Q → P. E, por terem labels diferentes, sem essa
+-- função seriam considerados diferentes.
+-- @param node1 Primeiro nó.
+-- @param node2 Segundo nó.
+-- @return true se são iguais, ou false caso sejam diferentes.
+function LogicModule.nodeEquals(node1, node2)
 
--- API functions to interact from graphical interface
-local function findf_sub(formNode, formStr)
-	local ret = false
-	local formulaNode = nil
-	
-	if formNode:getLabel():lower() == formStr:lower() then
-		formNode:setInformation("found", true)
-		table.insert(foundNodes, formNode)
-		ret = true
-		formulaNode = formNode
-	else
-		if formNode:getInformation("type") == opImp.graph then
-			ret = findf_sub(formNode:getEdgeOut(lblEdgeEsq):getDestino(), formStr)
-			formulaNode = formNode:getEdgeOut(lblEdgeEsq):getDestino()
-			if not ret then
-				ret = findf_sub(formNode:getEdgeOut(lblEdgeDir):getDestino(), formStr)
-				formulaNode = formNode:getEdgeOut(lblEdgeDir):getDestino()
-			end
-		end
-	end
-	return ret, formulaNode
-end
+	local node1Left, node1Right, node2Left, node2Right = nil
 
-local function findf_seq(seq, form, place)
-	local seqNode = finds(seq)
-	local ret = nil
-	local formulaNode = nil
-	local listEdgesOut = nil
-	
-	if seqNode ~= nil then
-		if place == lblEdgeEsq or place == lblEdgeDir then
-			listEdgesOut = seqNode:getEdgeOut(place):getDestino():getEdgesOut()
-		end
-
-		for i=1,#listEdgesOut do
-			formulaNode = listEdgesOut[i]:getDestino()
-			if formulaNode:getLabel():lower() == form:lower() then
-				ret = formulaNode
-				break
-			end
-		end		
-	end
-
-	return ret
-end
-
-local function finds_ded(seqNode, seqStr)
-	local foundNode = nil
-	
-	if seqNode ~= nil then
-		if seqNode:getLabel():lower() == seqStr:lower() then
-			seqNode:setInformation("found", true)
-			table.insert(foundNodes, seqNode)
-			
-			local leftSide = seqNode:getEdgeOut(lblEdgeEsq):getDestino()
-			local rightSide = seqNode:getEdgeOut(lblEdgeDir):getDestino()
-			
-			leftSide:setInformation("found", true)
-			table.insert(foundNodes, leftSide)
-			
-			for i=1,#leftSide:getEdgesOut() do
-				local formulaNode = leftSide:getEdgesOut()[i]:getDestino()
-				formulaNode:setInformation("found", true)
-				table.insert(foundNodes, formulaNode)
-			end
-
-			rightSide:setInformation("found", true)
-			table.insert(foundNodes, rightSide)
-			
-			for i=1,#rightSide:getEdgesOut() do
-				local formulaNode = rightSide:getEdgesOut()[i]:getDestino()
-				formulaNode:setInformation("found", true)
-				table.insert(foundNodes, formulaNode)
-			end
-			
-			foundNode = seqNode
+	-- Checagem de nós nulos. Aqui não é utilizado assert pois dois nós nulos teoricamente
+	-- são iguais.
+	--- Casos base
+	if node1 == nil then
+		logger:info("WARNING - function nodeEquals in module NaturalDeductionLogic recieved first parameter nil")
+		-- Ambos os nós nulos, tecnicamente são iguais (mas é lançado um aviso).
+		if node2 == nil then
+			logger:info("WARNING - function nodeEquals in module NaturalDeductionLogic recieved second parameter nil")
+			return true
+		-- Primeiro nó nulo e segundo não nulo.
 		else
-			if seqNode:getEdgeOut(lblEdgeDeducao) ~= nil then
-				local edgesOut = seqNode:getEdgesOut()
-				for i=1,#edgesOut do
-					if edgesOut[i]:getLabel() == lblEdgeDeducao then
-						foundNode = finds_ded(edgesOut[i]:getDestino(), seqStr)
-						if foundNode then
-							break
-						end
-					end
-				end
-			end
+			return false
 		end
-	end	
-	
-	return foundNode	
-end
+	else
+		-- Primeiro nó não nulo e segundo nulo.
+		if node2 == nil then
+			logger:info("WARNING - function nodeEquals in module NaturalDeductionLogic recieved second parameter nil")
+			return false
+		end
+	end
 
-function finds(seq)
-	local goalEdge = graph:getNode(lblNodeGG):getEdgesOut()
-	local seqNode = goalEdge[1]:getDestino()
+	-- Ambos os nós não nulos
+	for i, edge in ipairs(node1:getEdgesOut()) do
+		if edge:getDestino():getLabel() == lblEdgeEsq then
+			node1Left = edge:getDestino()
+		elseif edge:getDestino():getLabel() == lblEdgeDir then
+			node1Right = edge:getDestino()
+		end
+	end
 
-	return finds_ded(seqNode, seq)
+	for i, edge in ipairs(node2:getEdgesOut()) do
+		if edge:getDestino():getLabel() == lblEdgeEsq then
+			node2Left = edge:getDestino()
+		elseif edge:getDestino():getLabel() == lblEdgeDir then
+			node2Right = edge:getDestino()
+		end
+	end
+
+	-- Ambos nós atômicos; basta comparar seus labels
+	if node1Left == nil and node1Right == nil and node2Left == nil and node2Right == nil then
+		return node1:getLabel() == node2:getLabel()
+	-- Primeiro nó implicação, segundo nó atômico
+	elseif (node1Left == nil and node1Right == nil) then
+		return false
+	-- Primeiro nó atômico, segundo nó implicação
+	elseif (node2Left == nil and node2Right == nil) then
+		return false
+
+	-- Passo indutivo
+	-- Ambos nós de implicação.
+	else
+		return nodeEquals(node1Left, node2Left) and nodeEquals(node1Right, node2Right)
+	end
 end
 
 function findf(form)
@@ -1252,19 +1035,6 @@ function load()
 	f()
 end
 
--- TODO modificar
-function ileft(seq, form)
-	local seqNode = finds(seq)
-	local formNode = findf_seq(seq, form, lblNodeFocus)
-
-	assert(seqNode, "Sequent not found!")
-	assert(formNode, "Formula have to be inside focus of the sequent!")
-		
-	graph = applyImplyLeftRule(seqNode, formNode)
-	print_all()
-	clear()
-end
-
 -- TODO completar
 function impIntro(form)
 	-- local formNode = findf(form)
@@ -1282,19 +1052,6 @@ function impElim(form)
 	--assert(formNode, "Formula was not found to apply ImplyElim")
 
 	graph = applyImplyElimRule(form)
-	print_all()
-	clear()
-end
-
--- TODO modificar
-function iright(seq, form)
-	local seqNode = finds(seq)
-	local formNode = findf_seq(seq, form, lblEdgeDir)
-
-	assert(seqNode, "Sequent not found!")
-	assert(formNode, "Formula have to be on the right of the sequent!")
-	
-	graph = applyImplyRightRule(seqNode, formNode)
 	print_all()
 	clear()
 end

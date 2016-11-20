@@ -23,6 +23,6 @@ Formula{"valid-chi2", alpha2}
 local alpha3 = "((((A imp ("..chi3..")) imp (A)) imp (A)) imp ("..chi3..")) imp (C)"
 --Formula{"valid-chi3", alpha3}
 
-Formula{"invalid5", "A imp ((A imp (p)) imp ((q imp (q)) imp (p)))"}
-Formula{"invalid6", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
+--Formula{"invalid5", "A imp ((A imp (p)) imp ((q imp (q)) imp (p)))"}
+--Formula{"invalid6", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
 --Formula{"invalid7", "A imp ((A imp (t)) imp (((t imp (r)) imp (q imp (r))) imp ((r imp (q)) imp (p))))"}
