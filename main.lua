@@ -161,6 +161,8 @@ local function prepareGraphToDraw(graph)
       end
    end
 
+   applyForces(graph)
+
    return graph
 end
 
@@ -263,12 +265,13 @@ local function proofStarted()
          end
       end
    end
+   
    return ret
 end
 
 local function expandAll()
    if proofStarted() then
-      local graph = LogicModule.expandAll(NatDGraph)                    
+      local ret, graph = LogicModule.expandAll(NatDGraph)                    
       NatDGraph = prepareGraphToDraw(graph)
    end
 end
@@ -316,7 +319,7 @@ end
 local function expandFormula()
     if proofStarted() then
         if (nodeExpanding ~= nil) then
-            local ret, graph = LogicModule.expandNode(NatDGraph, natDNode, nodeExpanding)                    
+            local graph, ret = LogicModule.expandNode(NatDGraph, natDNode, nodeExpanding)                    
             NatDGraph = prepareGraphToDraw(graph)
         end
     end

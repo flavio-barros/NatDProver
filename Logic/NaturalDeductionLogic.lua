@@ -37,30 +37,9 @@ local elimIndex = 0
 -- Lista das hipóteses a serem descartadas.
 -- Uma hipótese é um predicado lógico. Na prática, essa lista contém os
 -- nós do grafo da prova.
-local dischargeable = {}
+LogicModule.dischargeable = {}
 
 -- Private functions
-
-local function copyLeftExpandedFormulas(natDNode)
-	local leftExpandedFormulas = natDNode:getInformation("leftExpandedFormulas")
-	local newLeftExpandedFormulas = Set:new()
-	for leftExpandedFormula, _ in pairs(leftExpandedFormulas) do
-		newLeftExpandedFormulas:add(leftExpandedFormula)
-	end
-
-	return newLeftExpandedFormulas
-end
-
-local function copyRestartedFormulas(natDNode)
-	local restartedFormulas = natDNode:getInformation("restartedFormulas")
-	local newRestartedFormulas = Set:new()
-
-	for restartedFormula, _ in pairs(restartedFormulas) do
-		newRestartedFormulas:add(restartedFormula)
-	end
-
-	return newRestartedFormulas
-end
 
 local function copyMarkedFormula(natDNode, formulaNode)
 
@@ -83,51 +62,6 @@ local function copyMarkedFormula(natDNode, formulaNode)
 	end	
 
 	return newNode
-end
-
--- TODO remover/modificar
-local function createNewSequent(natDNode)
-	local listNewNodes = {}
-	local listNewEdges = {}
-	
-	nodeSeqNew = NatDNode:new(natDNode:getInformation("type"))
-	listNewNodes[#listNewNodes+1] = nodeSeqNew
-	
-	local newNodeLeft = NatDNode:new(lblNodeEsq)
-	local newNodeDir = NatDNode:new(lblNodeDir)
-	listNewNodes[#listNewNodes+1] = newNodeLeft
-	listNewNodes[#listNewNodes+1] = newNodeDir
-
-	local newEdgeLeft = NatDEdge:new(lblEdgeEsq, nodeSeqNew, newNodeLeft)				 
-	local newEdgeRight = NatDEdge:new(lblEdgeDir, nodeSeqNew, newNodeDir)
-	listNewEdges[#listNewEdges+1] = newEdgeLeft
-	listNewEdges[#listNewEdges+1] = newEdgeRight
-	
-	local nodeEsq = natDNode:getEdgeOut(lblEdgeEsq):getDestino()
-	local nodeDir = natDNode:getEdgeOut(lblEdgeDir):getDestino()
-	
-	esqEdgesOut = nodeEsq:getEdgesOut()
-	for i=1, #esqEdgesOut do
-		local newEdge = NatDEdge:new(esqEdgesOut[i]:getLabel(), newNodeLeft, esqEdgesOut[i]:getDestino())
-		if esqEdgesOut[i]:getInformation("reference") ~= nil then
-			newEdge:setInformation("reference", esqEdgesOut[i]:getInformation("reference"))
-		end
-		listNewEdges[#listNewEdges+1] = newEdge
-	end
-
-	dirEdgesOut = nodeDir:getEdgesOut()
-	for i=1, #dirEdgesOut do
-		local newEdge = NatDEdge:new(dirEdgesOut[i]:getLabel(), newNodeDir, dirEdgesOut[i]:getDestino())
-		listNewEdges[#listNewEdges+1] = newEdge
-	end
-
-	local leftExpandedFormulas = copyLeftExpandedFormulas(natDNode)
-	nodeSeqNew:setInformation("leftExpandedFormulas", leftExpandedFormulas)
-
-	local restartedFormulas = copyRestartedFormulas(natDNode)
-	nodeSeqNew:setInformation("restartedFormulas", restartedFormulas)	  
-
-	return nodeSeqNew,listNewNodes,listNewEdges
 end
 
 local function generateNewGoal(natDNode)
@@ -707,7 +641,7 @@ local function applyImplyIntroRule(formulaNode)
 	introStepEdge:setInformation("rule", opImp.tex.." \\mbox{intro}".."_{"..currentStepNumber.."}")
 
 	-- Adiciona a hipótese à lista de hipóteses descartáveis
-	dischargeable[currentStepNumber] = impLeft
+	LogicModule.dischargeable[currentStepNumber] = impLeft
 
 	local newEdges = {introStepEdge, hypothesisEdge, predicateEdge}
 
@@ -718,8 +652,13 @@ local function applyImplyIntroRule(formulaNode)
 
 	logger:info("applyImplyIntroRule - "..formulaNode:getLabel().." was expanded")
 
-	-- TODO verificar de impRight (que está no topo) já é alguma das hipóteses
-	-- Assim, fecha-se o ramo.
+	for i, node in ipairs(LogicModule.dischargeable) do
+		if LogicModule.nodeEquals(node, impRight) then
+			impRight:setInformation("isExpanded", true)
+			impRight:setInformation("discharged", true)
+			break
+		end
+	end
 
 	return graph
 end
@@ -730,7 +669,7 @@ local function applyImplyElimRule(formulaNode)
 
 	-- TODO depois modificar para não pegar sempre o primeiro
 	-- TODO verificar se há pelo menos alguma hipótese a ser utilizada (método auxiliar?)
-	local hypothesisNode = dischargeable[currentStepNumber]
+	local hypothesisNode = LogicModule.dischargeable[currentStepNumber]
 	currentStepNumber = currentStepNumber - 1
 
 	-- Nós e arestas novos.
@@ -891,15 +830,26 @@ function LogicModule.expandAll(agraph, natDNode)
 		ret = true
 	end
 ]]
-	-- TODO começar aqui expandindo inicialmente pelas ImpIntro
+	graph = agraph
 
 	-- Começar a prova pelo nó inicial caso não tenha sido dado um nó
-	if natDNode == nil then
-		-- natDNode = graph:getNode
+	local currentNode = natDNode
+	if currentNode == nil then
+		currentNode = graph:getNode(lblNodeGG):getEdgeOut(lblRootEdge):getDestino()
 	end
 
+	-- Primeiros passos: realizar repetidamente ImpIntros até não ter mais uma implicação
+	while currentNode:getInformation("type") == opImp.graph do
+		graph = applyImplyIntroRule(currentNode)
+		currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate):getDestino()
+	end
 
-	return graph, ret 
+	-- Passos seguintes: realizar ImpElims e ImpIntros conforme necessário nos ramos livres.
+	-- Ramo aberto: sentença lógica ainda não provada.
+	-- Ramo fechado: hipótese descartada.
+	-- TODO
+
+	return true, graph
 end
 
 function LogicModule.getGraph()
@@ -918,11 +868,9 @@ end
 -- @param node2 Segundo nó.
 -- @return true se são iguais, ou false caso sejam diferentes.
 function LogicModule.nodeEquals(node1, node2)
-
 	local node1Left, node1Right, node2Left, node2Right = nil
 
-	-- Checagem de nós nulos. Aqui não é utilizado assert pois dois nós nulos teoricamente
-	-- são iguais.
+	-- Checagem de nós nulos. Aqui não é utilizado assert pois dois nós nulos teoricamente são iguais.
 	--- Casos base
 	if node1 == nil then
 		logger:info("WARNING - function nodeEquals in module NaturalDeductionLogic recieved first parameter nil")
@@ -943,18 +891,19 @@ function LogicModule.nodeEquals(node1, node2)
 	end
 
 	-- Ambos os nós não nulos
+
 	for i, edge in ipairs(node1:getEdgesOut()) do
-		if edge:getDestino():getLabel() == lblEdgeEsq then
+		if edge:getLabel() == lblEdgeEsq then
 			node1Left = edge:getDestino()
-		elseif edge:getDestino():getLabel() == lblEdgeDir then
+		elseif edge:getLabel() == lblEdgeDir then
 			node1Right = edge:getDestino()
 		end
 	end
 
 	for i, edge in ipairs(node2:getEdgesOut()) do
-		if edge:getDestino():getLabel() == lblEdgeEsq then
+		if edge:getLabel() == lblEdgeEsq then
 			node2Left = edge:getDestino()
-		elseif edge:getDestino():getLabel() == lblEdgeDir then
+		elseif edge:getLabel() == lblEdgeDir then
 			node2Right = edge:getDestino()
 		end
 	end
@@ -972,7 +921,7 @@ function LogicModule.nodeEquals(node1, node2)
 	-- Passo indutivo
 	-- Ambos nós de implicação.
 	else
-		return nodeEquals(node1Left, node2Left) and nodeEquals(node1Right, node2Right)
+		return LogicModule.nodeEquals(node1Left, node2Left) and LogicModule.nodeEquals(node1Right, node2Right)
 	end
 end
 
@@ -1067,7 +1016,7 @@ function step(pstep)
 end
 
 function print_all()
-	PrintModule.printProof(graph, "", true, #dischargeable)
+	PrintModule.printProof(graph, "", true, #LogicModule.dischargeable)
 	os.showProofOnBrowser()	
 	clear()	
 end

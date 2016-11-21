@@ -251,13 +251,13 @@ function Node:deleteEdgeOut(edge)
    if isEdgeDeleted then
       -- nao é do final
       for i = positionOfTheEdge, numEdges do
-	 edgesOut[i] = edgesOut[i+1]
-	 edgesOut[i+1] = nil
+	edgesOut[i] = edgesOut[i+1]
+	edgesOut[i+1] = nil
 	 
-	 if i+1 == numEdges then
+	if i+1 == numEdges then
 	    -- chegamos no final
 	    return true
-	 end
+	end
       end
    end
    
