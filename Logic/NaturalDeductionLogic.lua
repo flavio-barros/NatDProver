@@ -22,11 +22,12 @@ logger:setLevel(logging.INFO)
 
 LogicModule = {}
 
+-- Lista com os Goals/subgoals
 local goalsList = nil
+-- Lista dos ramos ativos no momento
+local openBranchesList = nil
+-- O grafo em si (global ao módulo)
 local graph = nil
-local counterModel = nil
-local foundNodes = {}
-local nstep = 0
 local sufix = 0
 -- Variável para indexação de descartes de hipótese
 -- Também utilizado para indexação das →-Intro
@@ -40,6 +41,26 @@ local elimIndex = 0
 LogicModule.dischargeable = {}
 
 -- Private functions
+
+-- Remove um ramo aberto da lista de ramos abertos.
+-- Uso principal: quando o ramo já foi expandido/descartado.
+local function removeOpenBranch(natDNode)
+	for i, node in ipairs(openBranchesList) do
+		if node:getLabel() == natDNode:getLabel() then
+			table.remove(openBranchesList, i)
+		end
+	end
+end
+
+-- Adiciona um novo ramo aberto na lista de ramos abertos.
+local function addNewOpenBranch(natDNode)
+
+	if openBranchesList == nil then
+		openBranchesList = {}
+	end
+
+	openBranchesList[#openBranchesList + 1] = natDNode
+end
 
 local function generateNewGoal(natDNode)
 
@@ -295,6 +316,14 @@ local function applyImplyIntroRule(formulaNode)
 		end
 	end
 
+	-- Caso não seja hipótese a descartar, adicionamos o ramo à lista de ramos abertos.
+	if not impRight:getInformation("discharged") then
+		addNewOpenBranch(impRight)
+	end
+
+	-- Remove o nó corrente da lista de ramos abertos.
+	removeOpenBranch(formulaNode)
+
 	return graph
 end
 
@@ -337,6 +366,19 @@ local function applyImplyElimRule(formulaNode, hypNode)
 			hypothesisNode:setInformation("discharged", true)
 		end
 	end
+
+	-- Caso não seja hipótese a descartar, adicionamos o ramo à lista de ramos abertos.
+	-- hypothesisNode (pred1)
+	if not hypothesisNode:getInformation("discharged") then
+		addNewOpenBranch(hypothesisNode)
+	end
+	-- newImpNode (pred2)
+	if not newImpNode:getInformation("discharged") then
+		addNewOpenBranch(newImpNode)
+	end
+
+	-- Remove o nó corrente da lista de ramos abertos.
+	removeOpenBranch(formulaNode)
 
 	return graph
 end
@@ -410,6 +452,20 @@ function LogicModule.expandAll(agraph, natDNode)
 	-- TODO alterar aqui para não pegar automaticamente da lista de dischargeable, mas pegar
 	-- dos Goals.
 
+	while #openBranchesList > 0 do
+		currentNode = openBranchesList[1]
+		-- TODO ver Goals
+
+		-- Nó que não é de implicação. Não é possível realizar ImpIntro, então deveremos realizar ImpElim.
+		if currentNode:getInformation("type") ~= opImp.graph then
+
+		-- Nó de implicação. Devemos decidir entre ImpElim ou ImpIntro.
+		else
+
+		end
+
+		removeOpenBranch(currentNode)
+	end
 
 	return true, graph
 end
@@ -482,12 +538,6 @@ function LogicModule.nodeEquals(node1, node2)
 	end
 end
 
-function clear()
-	for i,v in ipairs(foundNodes) do
-		v:setInformation("found", false)
-	end
-end
-
 function load()
 	local f = loadfile("commands.lua")
 	f()
@@ -496,23 +546,19 @@ end
 function impIntro(form)
 	graph = applyImplyIntroRule(form)
 	print_all()
-	clear()
 end
 
 function impElim(form, hypNode)
 	graph = applyImplyElimRule(form, hypNode)
 	print_all()
-	clear()
 end
 
 function run()
 	LogicModule.expandAll(graph)
-	clear()
 end
 
 function step(pstep)
 	LogicModule.expandAll(graph, pstep)
-	clear()
 end
 
 function print_all()
