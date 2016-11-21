@@ -110,7 +110,6 @@ function PrintModule.printProofStep(natDNode, file, printAll)
 				j = j+1
 
 			elseif edge:getLabel() == lblEdgeHypothesis then
-				-- TODO ver como printar, se é necessário por aqui. Talvez aqui colocar os colchetes ao redor?
 				nodeHyp = edge:getDestino()
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
@@ -156,6 +155,7 @@ function PrintModule.printProofStep(natDNode, file, printAll)
 				printSubNode(nodePred, ret, file, printAll)
 
 			-- →-Elim
+			-- TODO ver se é necessário modificar com as alterações em ImpElim
 			elseif nodePred1 ~= nil and nodePred2 ~= nil then
 				printSubNode(nodePred1, ret, file, printAll)
 				file:write(" \\qquad ")

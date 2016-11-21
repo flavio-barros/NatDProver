@@ -339,7 +339,8 @@ end
 -- LogicModule.expantImplyElimRule(grafo, nó selecionado para expansão)
 local function implyElimStep()
     if (nodeExpanding ~= nil) or (natDNode ~= nil) then    
-        local ret, graph = LogicModule.expandImplyElimRule(NatDGraph, natDNode)           
+        -- TODO VER COMO ACHAR O hypothesisNode
+        local ret, graph = LogicModule.expandImplyElimRule(NatDGraph, natDNode, hypothesisNode)           
         NatDGraph = prepareGraphToDraw(graph)
     end
 end
@@ -437,9 +438,7 @@ local function expandFormulaButtonEvent()
    local yLen = 40
 
    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then     
-      if love.mouse.isDown(leftMouseButton) then  
-         -- TODO remover a referência a focus?       
-         isChoosingFocus = true
+      if love.mouse.isDown(leftMouseButton) then
          love.timer.sleep(buttonTime*2)         
       end                        
       love.timer.sleep(buttonTime*2)
@@ -545,26 +544,6 @@ end
 -- o foco (no do tipo Sequent) estiver definido.
 local function dragNodeOrScreenOrSelectFocusEvent()     
 
-   -- TODO remover a parte do focus?
-   --[[if love.mouse.isDown(leftMouseButton) and isChoosingFocus then
-
-      natDNode = getNodeClicked()
-      
-      if natDNode then
-         isExpandingFormula = true
-         love.timer.sleep(2*buttonTime)    
-      end
-      
-   elseif love.mouse.isDown(leftMouseButton) and isExpandingFormula then
-
-      nodeExpanding = getNodeClicked()
-      
-      if nodeExpanding then         
-         isExpandingFormula = false
-         expandFormula()
-      end
-      
-   end]]
     if love.mouse.isDown(leftMouseButton) then
 
         natDNode = getNodeClicked()
@@ -690,8 +669,6 @@ function love.load(arg)
    love.graphics.setColor(0, 0, 0) -- Black Color
    font = love.graphics.newFont(11)
    isDragging = false
-   -- TODO remover a referência a focus?
-   isChoosingFocus = false
    isExpandingFormula = false
 
    -- Initialize the proof graph

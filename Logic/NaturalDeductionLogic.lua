@@ -41,29 +41,6 @@ LogicModule.dischargeable = {}
 
 -- Private functions
 
-local function copyMarkedFormula(natDNode, formulaNode)
-
-	local newNode = NatDNode:new(formulaNode:getInformation("type"))
-	newNode:setInformation("originalFormula", formulaNode)
-	graph:addNode(newNode)
-
-	local leftEdgesOut = natDNode:getEdgeOut(lblEdgeEsq):getDestino():getEdgesOut()	
-	local newEdge = NatDEdge:new(""..#leftEdgesOut, natDNode:getEdgeOut(lblEdgeEsq):getDestino(), newNode)
-	graph:addEdge(newEdge)
-
-	for _, leftEdge in ipairs(leftEdgesOut) do
-		if leftEdge:getDestino() == formulaNode then 
-			for k,info in pairs(leftEdge:getInformationTable()) do
-				if k ~= "reference" then
-					newEdge:setInformation(k, info)
-				end
-			end
-		end		
-	end	
-
-	return newNode
-end
-
 local function generateNewGoal(natDNode)
 
 	if goalsList == nil then
@@ -74,8 +51,6 @@ local function generateNewGoal(natDNode)
 	local newGoal = nil
 	local j = 1
 
-	-- TODO assim, há apenas uma lista com os goals possíveis.
-	-- Verificar se não é necessário uma lista de subgoals
 	if edgesOut ~= nil then
 		for k, _ in ipairs(edgesOut) do
 			for i = 1, #edgesOut[k] do
@@ -111,9 +86,8 @@ local function createGraphEmpty()
 	return NatDGraph
 end
 
----
---- @param letters Stores all atoms.  
-local function createGraphFormula(formula_tabela, letters)
+-- @param letters Stores all atoms.  
+local function createGraphFormula(formulasTable, letters)
 
 	local S1
 	local S2
@@ -122,8 +96,8 @@ local function createGraphFormula(formula_tabela, letters)
 	local NodeLetter = nil	
 	local FormulaGraph = Graph:new()
 
-	if formula_tabela.tag == "Atom" then 
-		local prop_letter = formula_tabela["1"]
+	if formulasTable.tag == "Atom" then 
+		local prop_letter = formulasTable["1"]
 		for k,v in pairs(letters) do 
 			if k == prop_letter then 
 				NodeLetter = v
@@ -141,10 +115,10 @@ local function createGraphFormula(formula_tabela, letters)
 		FormulaGraph:addEdges(edges)
 		FormulaGraph:setRoot(NodeLetter)
 		
-	elseif formula_tabela.tag == "imp" then
+	elseif formulasTable.tag == "imp" then
 
-		S1, letters = createGraphFormula(formula_tabela["1"],letters)
-		S2, letters = createGraphFormula(formula_tabela["2"],letters)
+		S1, letters = createGraphFormula(formulasTable["1"],letters)
+		S2, letters = createGraphFormula(formulasTable["2"],letters)
 
 		local NodeImp = NatDNode:new(opImp.graph)
 		local EdgeEsq = NatDEdge:new(lblEdgeEsq, NodeImp, S1.root)
@@ -161,7 +135,7 @@ local function createGraphFormula(formula_tabela, letters)
 		FormulaGraph:addEdges(edges)
 		FormulaGraph:setRoot(NodeImp)
 
-	-- TODO criar demais casos que não só implicação
+		-- TODO criar demais casos que não só implicação
 	end
 
 	return FormulaGraph, letters
@@ -187,48 +161,6 @@ local function createGraphNatD(form_table, letters)
 	goalsList[NodeGG:getLabel()] = {goal = generateNewGoal(NodeGG), weight = 1}
 
 	return NatDGraph
-end
-
-local function verifySideOfSequent(natDNode, formulaNode)
-	edgesOut = natDNode:getEdgesOut()
-
-	if edgesOut == nil then
-		return false
-	end
-
-	local retValues = {}
-
-	for i=1, #edgesOut do
-		if edgesOut[i]:getDestino():getLabel() == formulaNode:getLabel() then
-			return true
-		end
-	end
-
-	return false
-end
-
---- Verifies operator side in a sequent
-local function verifySideOfOperator(natDNode, formulaNode)
-	edgesOutList = natDNode:getEdgesOut()
-	if edgesOutList == nil then
-		return nil
-	end
-
-	for i=1, #edgesOutList do
-		if edgesOutList[i]:getLabel() == lblEdgeEsq then
-			if verifySideOfSequent(edgesOutList[i]:getDestino(), formulaNode) then
-				return "Left"
-			end
-		end
-
-		if edgesOutList[i]:getLabel() == lblEdgeDir then
-			if verifySideOfSequent(edgesOutList[i]:getDestino(), formulaNode) then
-				return "Right"
-			end
-		end					
-	end
-	
-	return nil 
 end
 
 local function markProvedPath(natDNode) 
@@ -406,112 +338,6 @@ local function compareSequentsFormulas(sideSeq, sideSeqParent)
 	return ret
 end
 
-local function isExpandable(natDNode)
-	local ret = false
-	local rule = ""
-	local formulaNode = nil
-
-	local rightFormulaNode = natDNode:getEdgeOut(lblEdgeDir):getDestino():getEdgeOut("0"):getDestino()
-	local typeOfNode = rightFormulaNode:getInformation("type")
-	formulaNode = rightFormulaNode
-	if typeOfNode == opImp.graph then
-		ret = true
-		rule = lblRuleImplyRight
-		logger:info("isExpandable - "..natDNode:getLabel().." ainda tem implicação `a direita.")
-	end	
-
-	if not ret then
-		local leftFormulasEdges = natDNode:getEdgeOut(lblEdgeEsq):getDestino():getEdgesOut()
-
-		for i=1, #leftFormulasEdges do
-			formulaNode = leftFormulasEdges[i]:getDestino()
-			local typeOfNode = formulaNode:getInformation("type")
-			
-			if leftFormulasEdges[i]:getLabel() ~= "0" then
-				if (leftFormulasEdges[i]:getInformation("reference") == nil or leftFormulasEdges[i]:getInformation("reference") == rightFormulaNode) and
-				not focusedFormulas[formulaNode] then
-					ret = true
-					rule = lblRuleFocus
-					logger:info("isExpandable - "..natDNode:getLabel().." ainda tem fórmulas para focar.")
-					break
-				end
-			end
-		end
-	end
-	
-	if not ret then
-		local leftExpandedFormulas = natDNode:getInformation("leftExpandedFormulas")
-
-		logger:info("isExpandable - Left Expanded Formulas - "..natDNode:getLabel())
-		for k,v in pairs(leftExpandedFormulas) do
-			logger:info(k:getLabel())
-		end
-
-		local edgesInOriginal = nil
-		local referenceFormula = nil
-		local hasReference = false
-		for _,edgesInFocus in ipairs(natDNode:getEdgeOut(lblEdgeEsq):getDestino():getEdgeOut("0"):getDestino():getEdgesOut()) do
-			formulaNode = edgesInFocus:getDestino()
-			if not leftExpandedFormulas[formulaNode:getInformation("originalFormula")] and formulaNode:getInformation("type") == opImp.graph then
-
-				-- for _,edgesInOriginal in ipairs(formulaNode:getInformation("originalFormula"):getEdgesIn()) do
-				--	 if edgesInOriginal:getInformation("reference") ~= nil then
-				--		 referenceFormula = edgesInOriginal:getInformation("reference")
-				--		 hasReference = true
-				--		 if referenceFormula == rightFormulaNode then
-				--			 ret = true
-				--			 rule = lblRuleImplyLeft
-				--			 logger:info("isExpandable - "..natDNode:getLabel().." ainda tem fórmulas focada não expandida com imply-left.")
-				--			 break
-				--		 end				
-				--	 end
-				-- end
-				
-				-- if hasReference then
-				--	 break
-				-- end
-
-				ret = true
-				rule = lblRuleImplyLeft
-				logger:info("isExpandable - "..natDNode:getLabel().." ainda tem fórmulas focada não expandida com imply-left.")
-				break
-			end
-		end		
-	end
-
-	if not ret then
-		local restartedFormulas = natDNode:getInformation("restartedFormulas")
-
-		if restartedFormulas == nil then
-			ret = true
-		else
-			local edgesFormulasInsideBracket = natDNode:getEdgeOut(lblEdgeDir):getDestino():getEdgeOut("1"):getDestino():getEdgesOut()
-
-			logger:info("Restarted Formulas - "..natDNode:getLabel())
-			for k,v in pairs(restartedFormulas) do
-				logger:info(k:getLabel())
-			end			
-
-			local i = #edgesFormulasInsideBracket
-			while i >= 1 do 
-				logger:info("isExpandable - "..natDNode:getLabel().." Inside Bracket: "..edgesFormulasInsideBracket[i]:getDestino():getLabel())
-				if not restartedFormulas:contains(edgesFormulasInsideBracket[i]:getDestino()) then
-					logger:info("isExpandable - "..natDNode:getLabel().." Restarted Formulas não contém "..edgesFormulasInsideBracket[i]:getDestino():getLabel())
-					logger:info("isExpandable - "..natDNode:getLabel().." ainda tem fórmulas para restartar.")
-					ret = true
-					rule = lblRuleRestart
-					formulaNode = edgesFormulasInsideBracket[i]:getDestino()
-					break
-				end
-				i = i - 1
-			end
-		end
-		
-	end
-	
-	return ret, rule, formulaNode
-end
-
 local function checkLoop(natDNode)
   
 	local esqNode, dirNode, dedSeq, esqNodeAnt, dirNodeAnt
@@ -652,6 +478,7 @@ local function applyImplyIntroRule(formulaNode)
 
 	logger:info("applyImplyIntroRule - "..formulaNode:getLabel().." was expanded")
 
+	-- Aqui verificamos se o nó presente na parte superior da prova pode ser hipótese a descartar.
 	for i, node in ipairs(LogicModule.dischargeable) do
 		if LogicModule.nodeEquals(node, impRight) then
 			impRight:setInformation("isExpanded", true)
@@ -664,13 +491,10 @@ local function applyImplyIntroRule(formulaNode)
 end
 
 -- TODO alterar essa função para receber também a hipótese da esquerda
-local function applyImplyElimRule(formulaNode)
+local function applyImplyElimRule(formulaNode, hypNode)
 	logger:debug("ImplyElim: Expanding "..formulaNode:getLabel())
 
-	-- TODO depois modificar para não pegar sempre o primeiro
-	-- TODO verificar se há pelo menos alguma hipótese a ser utilizada (método auxiliar?)
-	local hypothesisNode = LogicModule.dischargeable[currentStepNumber]
-	currentStepNumber = currentStepNumber - 1
+	local hypothesisNode = hypNode
 
 	-- Nós e arestas novos.
 	local elimStepNode = NatDNode:new(lblRuleImpElim)
@@ -695,7 +519,16 @@ local function applyImplyElimRule(formulaNode)
 
 	logger:info("applyImplyElimRule - "..formulaNode:getLabel().." was expanded")
 
-	-- TODO verificar se o newImpNode ou o outro lado estão na lista de hipóteses	
+	-- Aqui verificamos se os nós presentes na parte superior da prova podem ser hipóteses a descartar.
+	for i, node in ipairs(LogicModule.dischargeable) do
+		if LogicModule.nodeEquals(node, newImpNode) then
+			newImpNode:setInformation("isExpanded", true)
+			newImpNode:setInformation("discharged", true)
+		elseif LogicModule.nodeEquals(node, hypothesisNode) then
+			hypothesisNode:setInformation("isExpanded", true)
+			hypothesisNode:setInformation("discharged", true)
+		end
+	end
 
 	return graph
 end
@@ -707,19 +540,16 @@ function LogicModule.expandImplyIntroRule(agraph, formulaNode)
 	if typeOfNode == opImp.graph then
 		impIntro(formulaNode)
 	else
-		print("\n\n\nImpIntro deve ser utilizado em implicacoes.\n\n\n")
 		logger:info("WARNING - ImpIntro used on an non-implication node.")
 	end
 
 	return true, graph	
 end
 
-function LogicModule.expandImplyElimRule(agraph, formulaNode)
-	local typeOfNode = formulaNode:getInformation("type")
+function LogicModule.expandImplyElimRule(agraph, formulaNode, hypothesisNode)
 
 	graph = agraph
-	
-	impElim(formulaNode)
+	impElim(formulaNode, hypothesisNode)
 
 	return true, graph	
 end
@@ -745,91 +575,7 @@ end
 
 -- TODO aqui aplicar todos os implyintro e implyelim
 function LogicModule.expandAll(agraph, natDNode)
---[[
-	local isAllExpanded = true
-	local k, goalEntry
 
-	if natDNode then
-		resetGoalsWeight(0)
-		goalsList[natDNode:getLabel()].weight = 1
-	end
-
-	graph = agraph					
-	
-	for k,goalEntry in pairs(goalsList) do
-
-		if goalEntry.weight == 1 then
-		
-			local seq = goalEntry.goal:getSequent()
-
-			if not seq:getInformation("isExpanded") then
-				logger:info("expandAll - Expanding seq "..k)
-				
-				isAllExpanded = false
-
-				local formulaNode = nil
-				local restartedFormulas = nil
-				local leftExpandedFormula = nil
-				local newSeq = nil
-				local leftSide = goalEntry.goal:getLeftSide()
-				local rightSide = goalEntry.goal:getRightSide()
-				local expanded = false
-				local restarted = false
-				local edgesInLeft, restartedAtom
-
-				table.sort(leftSide, compareFormulasDegree)
-
-				if pstep == nil then
-					nstep = 1
-				else
-					if tonumber(pstep) <= nstep then
-						nstep = 0
-						break
-					else
-						nstep = nstep + 1
-					end
-				end
-				
-				if tonumber(k:sub(4)) == 36 then
-					local x = 10
-				end			 
-
-				if not verifyAxiom(seq) then
-					local ret, rule, formulaNode = isExpandable(seq)
-
-					if ret then
-						if rule == lblRuleImplyRight then
-							applyImplyRightRule(seq, formulaNode)
-						elseif rule == lblRuleImplyLeft then
-							applyImplyLeftRule(seq, formulaNode)
-						elseif rule == lblRuleRestart then
-							applyRestartRule(seq, formulaNode)
-						end												
-					else
-						goalsList = {}
-						nstep = 0
-						logger:info("expandAll - "..seq:getLabel().." não pode mais ser expandido.")
-						break							
-					end						
-				end		  
-			end
-		end		
-	end
-
-	local ret
-	if not isAllExpanded and nstep ~= 0 then
-		graph = LogicModule.expandAll(graph, pstep)
-		ret = false
-	else
-		nstep = 0
-		sufix = sufix + 1
-		LogicModule.printProof(graph, tostring(sufix))
-		os.showProofOnBrowser(tostring(sufix))
-		logGoalsList()
-		logger:info("expandAll - All sequents expanded!")
-		ret = true
-	end
-]]
 	graph = agraph
 
 	-- Começar a prova pelo nó inicial caso não tenha sido dado um nó
@@ -844,10 +590,20 @@ function LogicModule.expandAll(agraph, natDNode)
 		currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate):getDestino()
 	end
 
+	-- Até aqui, temos a certeza de que há apenas um ramo a ser expandido, então guardamos esse nó.
+	-- subRootNode será um nó fixo, para o qual voltaremos com currentNode caso necessário.
+	local subRootNode = currentNode
+
+
+
 	-- Passos seguintes: realizar ImpElims e ImpIntros conforme necessário nos ramos livres.
 	-- Ramo aberto: sentença lógica ainda não provada.
 	-- Ramo fechado: hipótese descartada.
-	-- TODO
+	-- Utilizar também os Goals: serão retirados da lista de dischargeable.
+	-- TODO verificar se há pelo menos alguma hipótese a ser utilizada (método auxiliar?)
+	-- TODO alterar aqui para não pegar automaticamente da lista de dischargeable, mas pegar
+	-- dos Goals.
+
 
 	return true, graph
 end
@@ -892,85 +648,37 @@ function LogicModule.nodeEquals(node1, node2)
 
 	-- Ambos os nós não nulos
 
-	for i, edge in ipairs(node1:getEdgesOut()) do
-		if edge:getLabel() == lblEdgeEsq then
-			node1Left = edge:getDestino()
-		elseif edge:getLabel() == lblEdgeDir then
-			node1Right = edge:getDestino()
-		end
-	end
-
-	for i, edge in ipairs(node2:getEdgesOut()) do
-		if edge:getLabel() == lblEdgeEsq then
-			node2Left = edge:getDestino()
-		elseif edge:getLabel() == lblEdgeDir then
-			node2Right = edge:getDestino()
-		end
-	end
-
 	-- Ambos nós atômicos; basta comparar seus labels
-	if node1Left == nil and node1Right == nil and node2Left == nil and node2Right == nil then
+	if node1:getInformation("type") ~= opImp.graph and node2:getInformation("type") ~= opImp.graph then
 		return node1:getLabel() == node2:getLabel()
 	-- Primeiro nó implicação, segundo nó atômico
-	elseif (node1Left == nil and node1Right == nil) then
+	elseif node1:getInformation("type") == opImp.graph and node2:getInformation("type") ~= opImp.graph then
 		return false
 	-- Primeiro nó atômico, segundo nó implicação
-	elseif (node2Left == nil and node2Right == nil) then
+	elseif node1:getInformation("type") ~= opImp.graph then
 		return false
 
 	-- Passo indutivo
 	-- Ambos nós de implicação.
 	else
-		return LogicModule.nodeEquals(node1Left, node2Left) and LogicModule.nodeEquals(node1Right, node2Right)
-	end
-end
-
-function findf(form)
-	local goalEdge = graph:getNode(lblNodeGG):getEdgesOut()
-	local seqNode = goalEdge[1]:getDestino()
-	local found = false
-	local formulaNode = nil
-
-	while seqNode ~= nil do
-		local leftSide = seqNode:getEdgeOut(lblEdgeEsq):getDestino()
-		local rightSide = seqNode:getEdgeOut(lblEdgeDir):getDestino()
-			
-		for i=1,#leftSide:getEdgesOut() do
-			local itemNode = leftSide:getEdgesOut()[i]:getDestino()
-			found, formulaNode = findf_sub(itemNode, form)
-			if found then
-				break
-			end		
+		for i, edge in ipairs(node1:getEdgesOut()) do
+			if edge:getLabel() == lblEdgeEsq then
+				node1Left = edge:getDestino()
+			elseif edge:getLabel() == lblEdgeDir then
+				node1Right = edge:getDestino()
+			end
 		end
 
-		if not found then
-			for i=1,#rightSide:getEdgesOut() do
-				local itemNode = rightSide:getEdgesOut()[i]:getDestino()
-				if itemNode:getInformation("type") == lblNodeBrackets then
-					local itemNodeEdges = itemNode:getEdgesOut()
-					for j=1,#itemNodeEdges do
-						found, formulaNode = findf_sub(itemNodeEdges:getDestino(), form)
-						if found then
-							break
-						end
-					end
-				else
-					found, formulaNode = findf_sub(itemNode, form)
-					if found then
-						break
-					end
-				end
+		for i, edge in ipairs(node2:getEdgesOut()) do
+			if edge:getLabel() == lblEdgeEsq then
+				node2Left = edge:getDestino()
+			elseif edge:getLabel() == lblEdgeDir then
+				node2Right = edge:getDestino()
 			end
 		end
 		
-		if seqNode:getEdgeOut(lblEdgeDeducao) ~= nil then
-			seqNode = seqNode:getEdgeOut(lblEdgeDeducao):getDestino()
-		else
-			seqNode = nil
-		end
+		return LogicModule.nodeEquals(node1Left, node2Left) and LogicModule.nodeEquals(node1Right, node2Right)
 	end
-	
-	return formulaNode
 end
 
 function clear()
@@ -984,23 +692,14 @@ function load()
 	f()
 end
 
--- TODO completar
 function impIntro(form)
-	-- local formNode = findf(form)
-
-	-- assert(formNode, "Formula was not found to apply ImplyIntro")
-
 	graph = applyImplyIntroRule(form)
 	print_all()
 	clear()
 end
 
-function impElim(form)
-	-- local formNode = findForm(form, lblNodeImp)
-
-	--assert(formNode, "Formula was not found to apply ImplyElim")
-
-	graph = applyImplyElimRule(form)
+function impElim(form, hypNode)
+	graph = applyImplyElimRule(form, hypNode)
 	print_all()
 	clear()
 end
