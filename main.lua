@@ -161,8 +161,6 @@ local function prepareGraphToDraw(graph)
       end
    end
 
-   applyForces(graph)
-
    return graph
 end
 
@@ -232,7 +230,7 @@ local function drawGraphEvent(graph)
       end
    end
 
-   --applyForces(graph)
+   applyForces(graph)
 end
 
 --- Esta função verifica se algum vertice foi clicado pelo usuário e retorna este vertice.
@@ -314,15 +312,6 @@ local function runCommand()
    NatDGraph = LogicModule.getGraph()
    prepareGraphToDraw(NatDGraph)
    inputCommand()
-end
-
-local function expandFormula()
-    if proofStarted() then
-        if (nodeExpanding ~= nil) then
-            local graph, ret = LogicModule.expandNode(NatDGraph, natDNode, nodeExpanding)                    
-            NatDGraph = prepareGraphToDraw(graph)
-        end
-    end
 end
 
 local function printProof()
@@ -431,35 +420,9 @@ local function inputFormulaButtonEvent()
    love.graphics.printf({{0, 0, 0}, inputFormulaButtonName}, xPos, yPos + 5, xLen, "center")
 end
 
-local function expandFormulaButtonEvent()
-   local xPos = windowWidth - 60
-   local yPos = 95
-   local xLen = 55
-   local yLen = 40
-
-   if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then     
-      if love.mouse.isDown(leftMouseButton) then
-         love.timer.sleep(buttonTime*2)         
-      end                        
-      love.timer.sleep(buttonTime*2)
-      love.graphics.setColor(100, 100, 200)
-   else
-      love.graphics.setColor(0, 100, 200)
-   end
-   love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
-   love.graphics.setColor(0, 0, 255)
-   love.graphics.setLineStyle("smooth")
-   love.graphics.line(xPos, yPos, xPos, yPos + yLen)
-   love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
-   love.graphics.setColor(255, 255, 255)
-   love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
-   love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-   love.graphics.printf({{0, 0, 0}, expandFormulaButtonName}, xPos, yPos + 5, xLen, "center")
-end
-
 local function printProofButtonEvent()
     local xPos = windowWidth - 60
-    local yPos = 140
+    local yPos = 95
     local xLen = 55
     local yLen = 40
     if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
@@ -485,7 +448,7 @@ end
 -- Para testes.
 local function implyElimStepButtonEvent()
     local xPos = windowWidth - 60
-    local yPos = 185
+    local yPos = 140
     local xLen = 55
     local yLen = 40
     if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
@@ -511,7 +474,7 @@ end
 -- Para testes.
 local function implyIntroStepButtonEvent()
     local xPos = windowWidth - 60
-    local yPos = 230
+    local yPos = 185
     local xLen = 55
     local yLen = 40
     if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
@@ -678,8 +641,7 @@ end
 function love.draw()
    showInputTextEvent()
    expandAllButtonEvent()
-   inputFormulaButtonEvent()
-   expandFormulaButtonEvent()    
+   inputFormulaButtonEvent()  
    printProofButtonEvent()
    implyElimStepButtonEvent()
    implyIntroStepButtonEvent()          

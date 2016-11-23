@@ -25,10 +25,9 @@ LogicModule = {}
 -- Lista com os Goals/subgoals
 local goalsList = nil
 -- Lista dos ramos ativos no momento
-local openBranchesList = nil
+local openBranchesList = {}
 -- O grafo em si (global ao módulo)
 local graph = nil
-local sufix = 0
 -- Variável para indexação de descartes de hipótese
 -- Também utilizado para indexação das →-Intro
 local currentStepNumber = 0
@@ -45,22 +44,25 @@ LogicModule.dischargeable = {}
 -- Remove um ramo aberto da lista de ramos abertos.
 -- Uso principal: quando o ramo já foi expandido/descartado.
 local function removeOpenBranch(natDNode)
+	local foundInTable = false
+
 	for i, node in ipairs(openBranchesList) do
 		if node:getLabel() == natDNode:getLabel() then
 			table.remove(openBranchesList, i)
+			foundInTable = true
 		end
+	end
+
+	if not foundInTable then
+		logger:info("WARNING - Attempted to remove a node from openBranchesList which was not in it.")
 	end
 end
 
 -- Adiciona um novo ramo aberto na lista de ramos abertos.
 local function addNewOpenBranch(natDNode)
-
-	if openBranchesList == nil then
-		openBranchesList = {}
-	end
-
 	openBranchesList[#openBranchesList + 1] = natDNode
 end
+
 
 local function generateNewGoal(natDNode)
 
@@ -70,7 +72,6 @@ local function generateNewGoal(natDNode)
 
 	local edgesOut = natDNode:getEdgesOut()
 	local newGoal = nil
-	local j = 1
 
 	if edgesOut ~= nil then
 		for k, _ in ipairs(edgesOut) do
@@ -80,12 +81,14 @@ local function generateNewGoal(natDNode)
 
 				-- TODO ver para mais tipos de nós
 				if typeOfNode == opImp.graph then
-					goalsList[j] = currentNode
-					j = j + 1
+					goalsList[#goalsList + 1] = currentNode
 				end
 			end
 		end
 	end
+
+	-- TODO encontrar o melhor jeito de guardar os goals
+	-- Pensar em utilizar subgoals!!!
 	
 	newGoal = Goal:new(natDNode, goalsList)
 					 
@@ -327,27 +330,74 @@ local function applyImplyIntroRule(formulaNode)
 	return graph
 end
 
--- TODO alterar essa função para receber também a hipótese da esquerda
-local function applyImplyElimRule(formulaNode, hypNode)
+-- Função que aplica a →-Elim em formulaNode.
+-- Ela pode receber também outros nós: hypNode (que representa o predicado sem a implicação a ser eliminada),
+-- e implyNode (que representa o predicado cuja implicação será eliminada). Caso sejam recebidos juntos é
+-- verificado se são compatíveis.
+-- Sempre é verificada a compatibilidade da conclusão de implyNode com formulaNode (caso contrário não faria
+-- sentido a →-Elim).
+-- Caso seja recebido apenas hypNode, implyNode será gerado ao criar uma implicação hypNode → formulaNode.
+-- Caso seja recebido apenas implyNode, hypNode será gerado a partir da premissa da implicação de implyNode.
+local function applyImplyElimRule(formulaNode, hypNode, implyNode)
 	logger:debug("ImplyElim: Expanding "..formulaNode:getLabel())
 
-	local hypothesisNode = hypNode
+	-- Nós novos
+	local hypothesisNode, elimStepNode, impNode = nil
+	local newNodes = {}
+	-- Arestas novas
+	local impLeftEdge, impRightEdge, elimStepEdge, predicateHypEdge, predicateImpEdge = nil
+	local newEdges = {}
 
-	-- Nós e arestas novos.
-	local elimStepNode = NatDNode:new(lblRuleImpElim)
-	local newImpNode = NatDNode:new(opImp.graph)
-	local newImpLeftEdge = NatDEdge:new(lblEdgeEsq, newImpNode, hypothesisNode)
-	local newImpRightEdge = NatDEdge:new(lblEdgeDir, newImpNode, formulaNode)
+	-- Ambos os nós recebidos
+	if hypNode ~= nil and implyNode ~= nil then
+		-- Nós incompatíveis
+		if not LogicModule.nodeEquals(implyNode:getEdgesOut(lblEdgeEsq):getDestino(), hypNode) then
+			logger:info("applyImpElimRule recieved 3 unrelated nodes.")
+			return graph
+		-- Nós compatíveis
+		else
+			hypothesisNode = hypNode
+			impNode = implyNode
+			impLeftEdge = impNode:getEdgesOut(lblEdgeEsq)
+			impRightEdge = impNode:getEdgesOut(lblEdgeDir)
+		end
 
-	local elimStepEdge = NatDEdge:new(lblEdgeDeduction, formulaNode, elimStepNode)
-	local predicateHypEdge = NatDEdge:new(lblEdgePredicate.."1", elimStepNode, hypothesisNode)
-	local predicateImpEdge = NatDEdge:new(lblEdgePredicate.."2", elimStepNode, newImpNode)
+	-- Recebeu apenas o nó de hipótese
+	elseif hypNode ~= nil and implyNode == nil then
+		hypothesisNode = hypNode
+		impNode = NatDNode:new(opImp.graph)
+		impLeftEdge = NatDEdge:new(lblEdgeEsq, impNode, hypothesisNode)
+		impRightEdge = NatDEdge:new(lblEdgeDir, impNode, formulaNode)
+		table.insert(newNodes, impNode)
+		table.insert(newEdges, impLeftEdge)
+		table.insert(newEdges, impRightEdge)
+
+	-- Recebeu apenas o nó de implicação
+	elseif hypNode == nil and implyNode ~= nil then
+		impNode = implyNode
+		impLeftEdge = impNode:getEdgesOut(lblEdgeEsq)
+		impRightEdge = impNode:getEdgesOut(lblEdgeDir)
+		hypothesisEdge = impLeftEdge:getDestino()
+
+	-- Ambos nulos; não recebeu nenhum dos dois.
+	else
+		-- TODO ver como tratar esse caso
+		logger:info("applyImpElimRule recieved 1 node only, when it needs at least 2.")
+		return graph
+	end
+
+	elimStepNode = NatDNode:new(lblRuleImpElim)
+	elimStepEdge = NatDEdge:new(lblEdgeDeduction, formulaNode, elimStepNode)
+	predicateHypEdge = NatDEdge:new(lblEdgePredicate.."1", elimStepNode, hypothesisNode)
+	predicateImpEdge = NatDEdge:new(lblEdgePredicate.."2", elimStepNode, impNode)
 
 	elimIndex = elimIndex + 1
 	elimStepEdge:setInformation("rule", opImp.tex.." \\mbox{elim}".."_{"..elimIndex.."}")
 
-	local newNodes = {newImpNode, elimStepNode}
-	local newEdges = {newImpLeftEdge, newImpRightEdge, elimStepEdge, predicateHypEdge, predicateImpEdge}
+	table.insert(newNodes, elimStepNode)
+	table.insert(newEdges, elimStepEdge)
+	table.insert(newEdges, predicateHypEdge)
+	table.insert(newEdges, predicateImpEdge)
 
 	graph:addNodes(newNodes)
 	graph:addEdges(newEdges)
@@ -358,12 +408,12 @@ local function applyImplyElimRule(formulaNode, hypNode)
 
 	-- Aqui verificamos se os nós presentes na parte superior da prova podem ser hipóteses a descartar.
 	for i, node in ipairs(LogicModule.dischargeable) do
-		if LogicModule.nodeEquals(node, newImpNode) then
-			newImpNode:setInformation("isExpanded", true)
-			newImpNode:setInformation("discharged", true)
-		elseif LogicModule.nodeEquals(node, hypothesisNode) then
+		if LogicModule.nodeEquals(node, hypothesisNode) then
 			hypothesisNode:setInformation("isExpanded", true)
 			hypothesisNode:setInformation("discharged", true)
+		elseif LogicModule.nodeEquals(node, impNode) then
+			impNode:setInformation("isExpanded", true)
+			impNode:setInformation("discharged", true)
 		end
 	end
 
@@ -372,9 +422,9 @@ local function applyImplyElimRule(formulaNode, hypNode)
 	if not hypothesisNode:getInformation("discharged") then
 		addNewOpenBranch(hypothesisNode)
 	end
-	-- newImpNode (pred2)
-	if not newImpNode:getInformation("discharged") then
-		addNewOpenBranch(newImpNode)
+	-- impNode (pred2)
+	if not impNode:getInformation("discharged") then
+		addNewOpenBranch(impNode)
 	end
 
 	-- Remove o nó corrente da lista de ramos abertos.
@@ -411,7 +461,6 @@ end
 --- @param form_table - Formula in table form.
 function LogicModule.createGraphFromTable(form_table)
 	local letters = {}
-	sufix = 0
 	local graph = nil
 	
 	if form_table =="empty" then 
@@ -455,6 +504,8 @@ function LogicModule.expandAll(agraph, natDNode)
 	while #openBranchesList > 0 do
 		currentNode = openBranchesList[1]
 		-- TODO ver Goals
+
+
 
 		-- Nó que não é de implicação. Não é possível realizar ImpIntro, então deveremos realizar ImpElim.
 		if currentNode:getInformation("type") ~= opImp.graph then
