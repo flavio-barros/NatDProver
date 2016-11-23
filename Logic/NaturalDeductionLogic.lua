@@ -212,32 +212,6 @@ local function createGraphNatD(form_table, letters)
 	return NatDGraph
 end
 
-local function markProvedPath(natDNode) 
-	local node = natDNode
-
-	while node ~= nil do
-		node:setInformation("isProved", true)
-		if node:getEdgeIn(lblEdgeDeducao) then 
-			node = node:getEdgeIn(lblEdgeDeducao):getOrigem()
-		else
-			node = nil
-		end
-	end
-end
-
-local function markCounterExamplePath(natDNode) 
-	local node = natDNode
-
-	while node ~= nil do
-		node:setInformation("isProved", false)
-		if node:getEdgeIn(lblEdgeDeducao) then 
-			node = node:getEdgeIn(lblEdgeDeducao):getOrigem()
-		else
-			node = nil
-		end
-	end
-end
-
 local function countGraphElements() 
 	local countNodeElements = {}
 	local countEdgesElements = {}  
@@ -521,7 +495,6 @@ function LogicModule.expandAll(agraph, natDNode)
 	local isReachable = nil
 	local ruleToApply = ""
 
-	-- TODO Dá um stack overflow!!!!!!!!!!
 	while #openBranchesList > 0 do
 		currentNode = openBranchesList[1]
 
@@ -682,7 +655,7 @@ function step(pstep)
 end
 
 function print_all()
-	PrintModule.printProof(graph, "", true, #LogicModule.dischargeable)
+	PrintModule.printProof(graph, "")
 	os.showProofOnBrowser()	
 	clear()	
 end

@@ -316,7 +316,7 @@ end
 
 local function printProof()
    if proofStarted() then
-      ret = PrintModule.printProof(NatDGraph)
+      ret = PrintModule.printProof(NatDGraph, "")
 
       if ret then
          os.showProofOnBrowser()
@@ -327,8 +327,7 @@ end
 -- Função que encapsula a função correspondente do módulo NaturalDeductionLogic:
 -- LogicModule.expantImplyElimRule(grafo, nó selecionado para expansão)
 local function implyElimStep()
-    if (nodeExpanding ~= nil) or (natDNode ~= nil) then    
-        -- TODO VER COMO ACHAR O hypothesisNode
+    if (nodeExpanding ~= nil) or (natDNode ~= nil) then
         local ret, graph = LogicModule.expandImplyElimRule(NatDGraph, natDNode, hypothesisNode)           
         NatDGraph = prepareGraphToDraw(graph)
     end

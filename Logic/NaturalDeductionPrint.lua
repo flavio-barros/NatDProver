@@ -30,26 +30,9 @@ local function findInDischargeable(formulaNode)
 	return dedNumber
 end
 
--- Função auxiliar para definir como lidar com o subnó do nó corrente sendo impresso.
-local function printSubNode(subNode, output, file, printAll)
-	local ret = output
-
-	-- Hipótese descartada; fim do ramo de dedução.
-	if subNode:getInformation("discharged") then
-		formula = PrintModule.printFormula(subNode)
-		ret = ret.."["..formula.."]".."_{"..findInDischargeable(subNode).."}"
-
-	-- Um nó que tem ramificações ainda.
-	else
-		PrintModule.printProofStep(subNode, file, printAll)
-	end
-
-	file:write(ret)
-end
-
 -- Função que imprime uma fórmula em lógica minimal (atômica ou implicação).
 -- É recursiva, portanto podem haver implicações de implicações etc.
-function PrintModule.printFormula(formulaNode)
+function printFormula(formulaNode)
 	local ret = ""
 	local edge, nodeLeft, nodeRight = nil
 
@@ -64,10 +47,10 @@ function PrintModule.printFormula(formulaNode)
 
 	-- Caso seja um nó de implicação nodeLeft e nodeRight são não nulos.
 	if (nodeLeft ~= nil) and (nodeRight ~= nil) then
-		local printLeft = PrintModule.printFormula(nodeLeft)
-		local printRight = PrintModule.printFormula(nodeRight)
-		ret = ret.."("..printLeft.." "..opImp.tex.." "..printRight..")"
-
+		local printLeft = printFormula(nodeLeft)
+		local printRight = printFormula(nodeRight)
+		ret = ret.."\\left("..printLeft.." "..opImp.tex.." "..printRight.."\\right)"
+		
 	-- Verificação a fim de evitar imprimir o Label de um nó de Dedução (ImpIntro ou ImpElim).
 	elseif (#formulaNode:getLabel() >= 7) then
 		if (formulaNode:getLabel():sub(1, 7) ~= lblRuleImpIntro:sub(1, 7)) and (formulaNode:getLabel():sub(1, 7) ~= lblRuleImpElim) then
@@ -83,19 +66,13 @@ function PrintModule.printFormula(formulaNode)
 	return ret
 end
 
--- Funções públicas
-
--- Funão que imprime um passo dedutivo do grafo.
-function PrintModule.printProofStep(natDNode, file, printAll)
-	local ret = ""
-	local edge, nodeMain, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, nodeHyp = nil
-	local deductions = {}
-	local j = 1
+-- Função que imprime um passo dedutivo do grafo.
+function PrintModule.printProofStep(natDNode, file)
+	local edge, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, nodeHyp = nil
 	local rule = ""
+	local formula = ""
 
 	if natDNode ~= nil then
-
-		local stepNumber = natDNode:getLabel():sub(4, natDNode:getLabel():len())
 
 		for i, edge in ipairs(natDNode:getEdgesOut()) do
 
@@ -105,12 +82,7 @@ function PrintModule.printProofStep(natDNode, file, printAll)
 				nodeDir = edge:getDestino()
 			elseif edge:getLabel() == lblEdgeDeduction then
 				local stepDed = edge:getDestino()
-				deductions[j] = stepDed
 				rule = edge:getInformation("rule")
-				j = j+1
-
-			elseif edge:getLabel() == lblEdgeHypothesis then
-				nodeHyp = edge:getDestino()
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
 			elseif edge:getLabel() == lblEdgePredicate then
@@ -124,121 +96,52 @@ function PrintModule.printProofStep(natDNode, file, printAll)
 			end
 		end
 
-		if not natDNode:getInformation("wasPrinted") or printAll then		  
-			if #deductions > 0 then
-				file:write("\\infer["..rule.."]\n")
-			end
+		-- Nó raiz do grafo
+		if natDNode:getLabel() == lblNodeGG then
+			printProofStep(natDNode:getEdgeOut(lblRootEdge):getDestino(), file)
 
-			if natDNode:getInformation("isAxiom") then
-				file:write("{\\color{blue}{")
-			else
-				file:write("{")
-			end
+		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
+		elseif stepDed ~= nil then
+			file:write("\\infer["..rule.."]\n")
+			
+			formula = printFormula(natDNode)
+			file:write("{{"..formula.."}\n")
 
-			if natDNode:getInformation("isProved") ~= nil and not natDNode:getInformation("isProved") then
-				file:write("{\\color{red}{")
-			else
-				file:write("{")
-			end
+			file:write("{")
+			printProofStep(stepDed, file)
+			file:write("}}")
 
-			if natDNode:getInformation("repetition") then
-				file:write("{\\color{green}{")
-			else
-				file:write("{")
-			end
+		-- É um nó de →-Intro. Basta delegar para o nó nodePred
+		elseif nodePred ~= nil then
+			printProofStep(nodePred, file)
 
-			local formula = PrintModule.printFormula(natDNode)
-			ret = ret..formula
+		-- É um nó de →-Elim. Basta delegar para os nós nodePred1 e nodePred2
+		elseif nodePred1 ~= nil and nodePred2 ~= nil then
+			printProofStep(nodePred1, file)
+			file:write("\n&\n")
+			printProofStep(nodePred2, file)
 
-			-- →-Intro
-			if nodePred ~= nil then
-				printSubNode(nodePred, ret, file, printAll)
-
-			-- →-Elim
-			-- TODO ver se é necessário modificar com as alterações em ImpElim
-			elseif nodePred1 ~= nil and nodePred2 ~= nil then
-				printSubNode(nodePred1, ret, file, printAll)
-				file:write(" \\qquad ")
-				printSubNode(nodePred2, ret, file, printAll)
-
-			-- Demais nós
-			else
-				file:write(ret)
-			end
-
-			if natDNode:getInformation("isAxiom") then
-				file:write("}}")
-			else				
-				file:write("}")
-			end
-
-			if natDNode:getInformation("isProved") ~= nil and not natDNode:getInformation("isProved") then
-				file:write("}}")
-			else
-				file:write("}")
-			end
-
-			if natDNode:getInformation("repetition") then
-				file:write("}}")
-			else				
-				file:write("}")
-			end
-
-			if #deductions > 0 then
-				file:write("\n{\n")
-
-				for i, edge in ipairs(deductions) do
-
-					PrintModule.printProofStep(deductions[i], file, printAll)
-
-					if #deductions > 1 and i < #deductions then
-						file:write(" & ")
-					end					  
-				end
-
-				file:write("\n}")
-			end
+		-- Nó de predicado lógico que não tem ramificações.
 		else
-			local close = false
-			if #deductions == 0 then
-				if not natDNode:getInformation("isAxiom") then
-					file:write("\\infer["..rule.."]\n")
-					file:write("\n{}")
-					file:write("\\qquad\\qquad\r")
-				end
-			else				
-				for i, edge in ipairs(deductions) do
-					if not deductions[i]:getInformation("wasPrinted") then
-						file:write("\\infer["..rule.."]\n")
-						file:write("\n{\n")
-						close = true
-					end
-					
-					PrintModule.printProofStep(deductions[i], file, printAll)
+			formula = printFormula(natDNode)
 
-					if #deductions > 1 and i < #deductions then
-						file:write(" & ")
-					end
-
-					if close then
-						file:write("\n}")
-						file:write("\\qquad\\qquad\r")					
-						close = false
-					end
-				end
+			-- Caso a hipótese seja descartada
+			if natDNode:getInformation("discharged") then
+				formula = "["..formula.."]".."_{"..findInDischargeable(natDNode).."}"
 			end
-		end
 
-		natDNode:setInformation("wasPrinted", true)
+			file:write("{"..formula.."}\n")
+
+		end
 	end
 end
 
+-- Função pública
 -- Função principal do módulo. Chama a função recursiva printProofStep.
 -- @param agraph Grafo da prova.
 -- @param nameSufix Sufixo para identificação da prova.
--- @param printAll Indicador de que a prova será toda impressa (booleano).
 -- @return Uma string com a prova em LaTeX.
-function PrintModule.printProof(agraph, nameSufix, printAll)
+function PrintModule.printProof(agraph, nameSufix)
 	graph = agraph
 
 	if nameSufix == nil then nameSufix = "" end
@@ -258,7 +161,7 @@ function PrintModule.printProof(agraph, nameSufix, printAll)
 		file:write("\\begin{document}\n")
 		file:write("$$\n")
 
-		PrintModule.printProofStep(step, file, printAll)
+		PrintModule.printProofStep(step, file)
 
 		file:write("\n$$")
 		file:write("\\end{document}\n")
