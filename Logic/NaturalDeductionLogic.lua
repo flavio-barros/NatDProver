@@ -95,6 +95,31 @@ local function generateNewGoal(natDNode)
 	return newGoal
 end
 
+-- Função que verifica se o goal corrente pode ser alcançado pelo nó (ramo) recebido, diretamente.
+-- Caso seja, retorna true, e false caso contrário. Em caso de reotrno positivo também retorna o label
+-- da regra a ser utilizada (no caso, →-Intro ou →-Elim).
+-- A preferência de retorno é dada à →-Intro, pois há menos possibilidade de aumento do tamanho da
+-- demonstração por só abrir um ramo.
+local function isGoalReachable(currentGoalNode, currentNode)
+	-- Verifica se é alcançável via →-Intro
+	-- currentNode deve ser uma implicação e seu nó à direita deve ser currentGoalNode
+	if currentNode:getInformation("type") == opImp.graph then
+		if LogicModule.nodeEquals(currentGoalNode, currentNode:getEdgeOut(lblEdgeDir):getDestino()) then
+			return true, lblRuleImpIntro
+		end
+	end
+
+	-- Verifica se é alcançável via →-Elim
+	-- currentNode deve ser o nó à direita de currentGoalNode
+	if currentGoalNode:getInformation("type") == opImp.graph then
+		if LogicModule.nodeEquals(currentNode, currentGoalNode:getEdgeOut(lblEdgeDir):getDestino()) then
+			return true, lblRuleImpElim
+		end
+	end
+
+	return false, ""
+end
+
 local function createGraphEmpty()
 
 	local NatDGraph = Graph:new()
@@ -256,15 +281,7 @@ local function logGoalsList()
 	end
 end
 
-local function resetGoalsWeight(pweight)
-
-	local k, goalEntry
-	
-	for k,goalEntry in pairs(goalsList) do
-		goalEntry.weight = pweight
-	end	
-end
-
+-- Função que diz o tamanho/grau de uma fórmula (na prática, é seu número de implicações).
 local function degreeOfFormula(formulaNode)
 	if formulaNode:getInformation("type") ~= opImp.graph then
 		return 0
@@ -274,6 +291,7 @@ local function degreeOfFormula(formulaNode)
 	end
 end
 
+-- Função que compara os graus de duas fórmulas.
 local function compareFormulasDegree(formulaA, formulaB)
 	local countFormulaA = degreeOfFormula(formulaA)
 	local countFormulaB = degreeOfFormula(formulaB)
@@ -358,8 +376,8 @@ local function applyImplyElimRule(formulaNode, hypNode, implyNode)
 		else
 			hypothesisNode = hypNode
 			impNode = implyNode
-			impLeftEdge = impNode:getEdgesOut(lblEdgeEsq)
-			impRightEdge = impNode:getEdgesOut(lblEdgeDir)
+			impLeftEdge = impNode:getEdgeOut(lblEdgeEsq)
+			impRightEdge = impNode:getEdgeOut(lblEdgeDir)
 		end
 
 	-- Recebeu apenas o nó de hipótese
@@ -375,9 +393,9 @@ local function applyImplyElimRule(formulaNode, hypNode, implyNode)
 	-- Recebeu apenas o nó de implicação
 	elseif hypNode == nil and implyNode ~= nil then
 		impNode = implyNode
-		impLeftEdge = impNode:getEdgesOut(lblEdgeEsq)
-		impRightEdge = impNode:getEdgesOut(lblEdgeDir)
-		hypothesisEdge = impLeftEdge:getDestino()
+		impLeftEdge = impNode:getEdgeOut(lblEdgeEsq)
+		impRightEdge = impNode:getEdgeOut(lblEdgeDir)
+		hypothesisNode = impLeftEdge:getDestino()
 
 	-- Ambos nulos; não recebeu nenhum dos dois.
 	else
@@ -496,26 +514,77 @@ function LogicModule.expandAll(agraph, natDNode)
 	-- Passos seguintes: realizar ImpElims e ImpIntros conforme necessário nos ramos livres.
 	-- Ramo aberto: sentença lógica ainda não provada.
 	-- Ramo fechado: hipótese descartada.
-	-- Utilizar também os Goals: serão retirados da lista de dischargeable.
-	-- TODO verificar se há pelo menos alguma hipótese a ser utilizada (método auxiliar?)
-	-- TODO alterar aqui para não pegar automaticamente da lista de dischargeable, mas pegar
-	-- dos Goals.
+	-- Goals: serão retirados da lista de dischargeable.
+	local mainGoalNode = LogicModule.dischargeable[1]
+	local currentGoalNode = mainGoalNode
+	local currentGoalIndex = 1
+	local isReachable = nil
+	local ruleToApply = ""
 
+	-- TODO Dá um stack overflow!!!!!!!!!!
 	while #openBranchesList > 0 do
 		currentNode = openBranchesList[1]
-		-- TODO ver Goals
 
+		isReachable, ruleToApply = isGoalReachable(currentGoalNode, currentNode)
 
+		if isReachable then 
+			-- Nó que não é de implicação. Não é possível realizar ImpIntro, então deveremos realizar ImpElim.
+			-- TODO A VER: nesse caso, realizamos ImpElim utilizando a hipótese descartável de menor tamanho
+			-- para ser o nó maior da →-Elim.
+			if currentNode:getInformation("type") ~= opImp.graph then
+				if currentGoalNode:getInformation("type") == opImp.graph then
+					graph = applyImplyElimRule(currentNode, nil, currentGoalNode)
+					currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate.."1"):getDestino()
 
-		-- Nó que não é de implicação. Não é possível realizar ImpIntro, então deveremos realizar ImpElim.
-		if currentNode:getInformation("type") ~= opImp.graph then
+				else
+					graph = applyImplyElimRule(currentNode, currentGoalNode, nil)
+					currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate.."2"):getDestino()
+				end
 
-		-- Nó de implicação. Devemos decidir entre ImpElim ou ImpIntro.
+			-- Nó de implicação. Devemos decidir entre ImpElim ou ImpIntro.
+			else
+				if ruleToApply == lblRuleImpIntro then
+					graph = applyImplyIntroRule(currentNode)
+					currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate):getDestino()
+
+				-- TODO verificar se nesse caso é sempre esse tratamento
+				elseif ruleToApply == lblRuleImpElim then
+					if currentGoalNode:getInformation("type") == opImp.graph then
+						graph = applyImplyElimRule(currentNode, nil, currentGoalNode)
+						currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate.."1"):getDestino()
+
+					else
+						graph = applyImplyElimRule(currentNode, currentGoalNode, nil)
+						currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate.."2"):getDestino()
+					end
+				
+				else
+					log:info("ERRO - ruleToApply em LogicModule.expandAll não apresenta valor válido.")
+					return false, graph
+				end
+			end
+
+			removeOpenBranch(currentNode)
+
+		-- Goal atual não alcançável. Passamos para o subgoal (caso não seja possível, vamos para outro goal).
+		-- Subgoal: o nó à direita da implicação do goal atual.
 		else
+			if currentGoalNode:getInformation("type") == opImp.graph then
+				currentGoalNode = currentGoalNode:getEdgeOut(lblEdgeDir):getDestino()
 
+			-- Não sendo uma implicação, partimos para o Goal seguinte. Não havendo um Goal seguinte,
+			-- podemos concluir que a prova não é válida.
+			-- TODO verificar se podemos ter essa certeza.
+			else
+				if currentGoalIndex + 1 > #LogicModule.dischargeable then
+					log:info("INFO - A prova não pôde ser concluída. Teorema não válido.")
+					return false, graph
+				else
+					currentGoalNode = LogicModule.dischargeable[currentGoalIndex + 1]
+					currentGoalIndex = currentGoalIndex + 1
+				end
+			end
 		end
-
-		removeOpenBranch(currentNode)
 	end
 
 	return true, graph
