@@ -9,7 +9,6 @@ Formula{"valid2", "(A imp (B imp (C))) imp (B imp (A imp (C)))"}
 Formula{"valid3", "(q imp (p imp (p))) imp (p imp (q imp (p)))"}
 Formula{"valid4", "(q imp (p)) imp (q imp (p))"}
 Formula{"valid5", "(q imp (p)) imp (p imp (p))"}
-Formula{"HermannTest", "(((((a imp (b)) imp (a)) imp (a)) imp (b)) imp (b))"}
 
 -- Chi Formulas: 
 local chi1 = "C"
@@ -17,12 +16,12 @@ local chi2 = "(((D imp (C)) imp (D)) imp (D)) imp (C)"
 local chi3 = "(((E imp ("..chi2..")) imp (E)) imp (E)) imp ("..chi2..")"
 
 local alpha1 = "((((A imp ("..chi1..")) imp (A)) imp (A)) imp ("..chi1..")) imp (C)"
-Formula{"valid-chi1", alpha1}
+Formula{"HermannTest", alpha1}
 local alpha2 = "((((A imp ("..chi2..")) imp (A)) imp (A)) imp ("..chi2..")) imp (C)"
 Formula{"valid-chi2", alpha2}
 local alpha3 = "((((A imp ("..chi3..")) imp (A)) imp (A)) imp ("..chi3..")) imp (C)"
---Formula{"valid-chi3", alpha3}
+Formula{"valid-chi3", alpha3}
 
---Formula{"invalid5", "A imp ((A imp (p)) imp ((q imp (q)) imp (p)))"}
---Formula{"invalid6", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
---Formula{"invalid7", "A imp ((A imp (t)) imp (((t imp (r)) imp (q imp (r))) imp ((r imp (q)) imp (p))))"}
+Formula{"invalid5", "A imp ((A imp (p)) imp ((q imp (q)) imp (p)))"}
+Formula{"invalid6", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
+Formula{"invalid7", "A imp ((A imp (t)) imp (((t imp (r)) imp (q imp (r))) imp ((r imp (q)) imp (p))))"}

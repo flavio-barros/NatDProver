@@ -268,10 +268,13 @@ local function proofStarted()
 end
 
 local function expandAll()
-   if proofStarted() then
-      local ret, graph = LogicModule.expandAll(NatDGraph)                    
-      NatDGraph = prepareGraphToDraw(graph)
-   end
+    if proofStarted() then
+        local ret, graph = LogicModule.expandAll(NatDGraph)
+        if ret == false then
+            print("\nProva Inválida!\n")
+        end
+        NatDGraph = prepareGraphToDraw(graph)
+    end
 end
 
 local function inputFormula()

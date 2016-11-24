@@ -11,30 +11,30 @@
 -------------------------------------------------------------------------------
 
 function os.capture()
-   local f = assert(io.popen('uname', 'r'))
-   local s = assert(f:read('*a'))
-   f:close()
-   s = string.gsub(s, '^%s+', '')
-   s = string.gsub(s, '%s+$', '')
-   s = string.gsub(s, '[\n\r]+', ' ')
-   return s
+    local f = assert(io.popen('uname', 'r'))
+    local s = assert(f:read('*a'))
+    f:close()
+    s = string.gsub(s, '^%s+', '')
+    s = string.gsub(s, '%s+$', '')
+    s = string.gsub(s, '[\n\r]+', ' ')
+    return s
 end
 
 function os.showProofOnBrowser(nameSufix)
 
-   if nameSufix == nil then nameSufix = "" end
+    if nameSufix == nil then nameSufix = "" end
    
-   --os.execute("pdflatex -output-directory=aux aux/prooftree.tex")
-   
-   os.execute("htlatex aux/prooftree"..nameSufix..".tex '' '' -daux/"  )
-   
-   if os.capture() == "Darwin" then
-      os.execute("open aux/prooftree"..nameSufix..".html")                                        
-   elseif os.capture() == "Linux" then
-      os.execute("xdg-open aux/prooftree"..nameSufix..".html")
-   else
-      os.execute("start aux/prooftree"..nameSufix..".html")
-   end
+    os.execute("pdflatex -output-directory=aux aux/prooftree.tex")
+    
+    os.execute("htlatex aux/prooftree"..nameSufix..".tex '' '' -daux/")
 
-   os.execute("rm -f prooftree*")  
+    if os.capture() == "Darwin" then
+        os.execute("open aux/prooftree"..nameSufix..".html")                                        
+    elseif os.capture() == "Linux" then
+        os.execute("xdg-open aux/prooftree"..nameSufix..".html")
+    else
+        os.execute("start aux/prooftree"..nameSufix..".html")
+    end
+
+    os.execute("rm -f prooftree*")
 end

@@ -8,10 +8,8 @@
 -------------------------------------------------------------------------------
 
 require "Logic/NatDGraph"
-require "Logic/Goal"
 require "Logic/ConstantsForNatD"
 require 'ParseInput'
-require "Logic/Set"
 require "Util/utility"
 
 PrintModule = {}
@@ -49,7 +47,7 @@ function printFormula(formulaNode)
 	if (nodeLeft ~= nil) and (nodeRight ~= nil) then
 		local printLeft = printFormula(nodeLeft)
 		local printRight = printFormula(nodeRight)
-		ret = ret.."\\left("..printLeft.." "..opImp.tex.." "..printRight.."\\right)"
+		ret = ret.."("..printLeft.." "..opImp.tex.." "..printRight..")"
 		
 	-- Verificação a fim de evitar imprimir o Label de um nó de Dedução (ImpIntro ou ImpElim).
 	elseif (#formulaNode:getLabel() >= 7) then
@@ -67,21 +65,21 @@ function printFormula(formulaNode)
 end
 
 -- Função que imprime um passo dedutivo do grafo.
-function PrintModule.printProofStep(natDNode, file)
-	local edge, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, nodeHyp = nil
+function printProofStep(natDNode, file)
+	local edge, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, stepDed = nil
 	local rule = ""
 	local formula = ""
 
 	if natDNode ~= nil then
 
 		for i, edge in ipairs(natDNode:getEdgesOut()) do
-
+			-- Nó de implicação
 			if edge:getLabel() == lblEdgeEsq then
 				nodeEsq = edge:getDestino()
 			elseif edge:getLabel() == lblEdgeDir then
 				nodeDir = edge:getDestino()
 			elseif edge:getLabel() == lblEdgeDeduction then
-				local stepDed = edge:getDestino()
+				stepDed = edge:getDestino()
 				rule = edge:getInformation("rule")
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
@@ -96,30 +94,44 @@ function PrintModule.printProofStep(natDNode, file)
 			end
 		end
 
-		-- Nó raiz do grafo
-		if natDNode:getLabel() == lblNodeGG then
-			printProofStep(natDNode:getEdgeOut(lblRootEdge):getDestino(), file)
-
 		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
-		elseif stepDed ~= nil then
+		if stepDed ~= nil and not stepDed:getInformation("wasPrinted") then
 			file:write("\\infer["..rule.."]\n")
 			
 			formula = printFormula(natDNode)
-			file:write("{{"..formula.."}\n")
+			file:write("{"..formula.."}\n")
 
 			file:write("{")
 			printProofStep(stepDed, file)
-			file:write("}}")
+			file:write("}\n")
 
 		-- É um nó de →-Intro. Basta delegar para o nó nodePred
 		elseif nodePred ~= nil then
+			natDNode:getInformation("wasPrinted")
+			
+			if nodePred:getInformation("Invalid") then file:write("{\\color{red}{\n") end
+
 			printProofStep(nodePred, file)
+
+			if nodePred:getInformation("Invalid") then file:write("}}\n") end
 
 		-- É um nó de →-Elim. Basta delegar para os nós nodePred1 e nodePred2
 		elseif nodePred1 ~= nil and nodePred2 ~= nil then
+			natDNode:getInformation("wasPrinted")
+
+			if nodePred1:getInformation("Invalid") then file:write("{\\color{red}{\n") end
+
 			printProofStep(nodePred1, file)
-			file:write("\n&\n")
+
+			if nodePred1:getInformation("Invalid") then file:write("}}\n") end
+
+			file:write("&\n")
+
+			if nodePred2:getInformation("Invalid") then file:write("{\\color{red}{\n") end
+
 			printProofStep(nodePred2, file)
+
+			if nodePred2:getInformation("Invalid") then	file:write("}}\n") end
 
 		-- Nó de predicado lógico que não tem ramificações.
 		else
@@ -147,12 +159,11 @@ function PrintModule.printProof(agraph, nameSufix)
 	if nameSufix == nil then nameSufix = "" end
 	
 	local file = io.open("aux/prooftree"..nameSufix..".tex", "w")	
-	local goalEdge = agraph:getNode(lblNodeGG):getEdgesOut()
 	local ret = false
 
-	if (goalEdge ~= nil) and (#goalEdge > 0) then
+	if agraph ~= nil then
 		
-		local step = goalEdge[1]:getDestino()
+		local step = agraph:getNode(lblNodeGG):getEdgeOut(lblRootEdge):getDestino()
 
 		file:write("\\documentclass[landscape]{article}\n\n")
 		file:write("\\usepackage{color}\n")
@@ -161,9 +172,9 @@ function PrintModule.printProof(agraph, nameSufix)
 		file:write("\\begin{document}\n")
 		file:write("$$\n")
 
-		PrintModule.printProofStep(step, file)
+		printProofStep(step, file)
 
-		file:write("\n$$")
+		file:write("$$\n")
 		file:write("\\end{document}\n")
 		file:close()
 
