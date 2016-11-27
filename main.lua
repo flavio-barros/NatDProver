@@ -318,13 +318,13 @@ local function runCommand()
 end
 
 local function printProof()
-   if proofStarted() then
-      ret = PrintModule.printProof(NatDGraph, "")
+    if proofStarted() then
+        ret = PrintModule.printProof(NatDGraph, "")
 
-      if ret then
-         os.showProofOnBrowser()
-      end
-   end
+        if ret then
+            os.showProofOnBrowser()
+        end
+    end
 end
 
 -- Função que encapsula a função correspondente do módulo NaturalDeductionLogic:
@@ -645,8 +645,8 @@ function love.draw()
    expandAllButtonEvent()
    inputFormulaButtonEvent()  
    printProofButtonEvent()
-   implyElimStepButtonEvent()
-   implyIntroStepButtonEvent()          
+   --implyElimStepButtonEvent()
+   --implyIntroStepButtonEvent()          
    drawGraphEvent(NatDGraph)
    dragNodeOrScreenOrSelectFocusEvent()         
 end

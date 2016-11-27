@@ -9,8 +9,6 @@
 
 require "Logic/NatDGraph"
 require "Logic/ConstantsForNatD"
-require 'ParseInput'
-require "Util/utility"
 
 PrintModule = {}
 

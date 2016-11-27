@@ -8,7 +8,7 @@ Installation
 
 NatDProver depends on the following libraries (listed with the versions I'm using):
 
-* love (0.7.2)
+* love (0.10,1)
 * luasocket (3.0rc1-1)
 * lpeg (0.12-1)
 * lualogging (1.3.0-1)

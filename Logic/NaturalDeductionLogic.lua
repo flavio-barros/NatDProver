@@ -10,10 +10,9 @@
 require "Logic/NatDGraph"
 require "Logic/ConstantsForNatD"
 require "Logic/NaturalDeductionPrint"
-require 'ParseInput'
 require "logging"
 require "logging.file"
-require "Util/utility"
+--require "Util/utility"
 
 local logger = logging.file("aux/prover%s.log", "%Y-%m-%d")
 logger:setLevel(logging.INFO)
@@ -173,6 +172,8 @@ local function createGraphNatD(form_table, letters)
 	NatDGraph:addEdges(S.edges)
 
 	goalsList = {}
+	currentStepNumber = 0
+	elimIndex = 0
 
 	return NatDGraph
 end
@@ -541,7 +542,7 @@ function LogicModule.nodeEquals(node1, node2)
 		return LogicModule.nodeEquals(node1Left, node2Left) and LogicModule.nodeEquals(node1Right, node2Right)
 	end
 end
-
+--[[
 function load()
 	local f = loadfile("commands.lua")
 	f()
@@ -570,3 +571,4 @@ function print_all()
 	os.showProofOnBrowser()	
 	clear()	
 end
+]]
