@@ -402,7 +402,7 @@ function LogicModule.expandAll(agraph, natDNode)
 	-- Ramo fechado: hipótese descartada.
 	-- Goals: serão retirados da lista de dischargeable.
 	local currentGoalNode = LogicModule.dischargeable[1]
-	local parentGoal = currentGoalNode
+	local parentGoalNode = currentGoalNode
 	local currentGoalIndex = 1
 	local isReachable = nil
 	local ruleToApply = ""
@@ -413,6 +413,8 @@ function LogicModule.expandAll(agraph, natDNode)
 			currentNode:setInformation("Attempts", 0)
 		end
 
+		print(currentNode:getLabel())
+		print(currentGoalNode:getLabel().."\n")
 		isReachable, ruleToApply = isGoalReachable(currentGoalNode, currentNode)
 
 		if isReachable then 
@@ -422,7 +424,6 @@ function LogicModule.expandAll(agraph, natDNode)
 			if currentNode:getInformation("type") ~= opImp.graph then
 				if currentGoalNode:getInformation("type") == opImp.graph then
 					graph = applyImplyElimRule(currentNode, nil, currentGoalNode)
-
 				else
 					graph = applyImplyElimRule(currentNode, currentGoalNode, nil)
 				end
@@ -463,17 +464,24 @@ function LogicModule.expandAll(agraph, natDNode)
 			-- TODO podemos ter essa certeza?
 			else
 				if currentGoalIndex + 1 > #LogicModule.dischargeable then
-					if currentNode:getInformation("Attempts") > 2 then 
+					-- Nesse caso, aplicar a regra de →-Intro.
+					if currentNode:getInformation("type") == opImp.graph then
+						graph = applyImplyIntroRule(currentNode)
+						currentGoalNode = parentGoalNode
+
+					elseif currentNode:getInformation("Attempts") > 2 then 
 						logger:info("INFO - A prova não pôde ser concluída. Teorema não válido.")
 						currentNode:setInformation("Invalid", true)
 						return false, graph
 
+					-- Voltamos ao primeiro Goal.
 					else
 						currentNode:setInformation("Attempts", currentNode:getInformation("Attempts") + 1)
 						currentGoalNode = LogicModule.dischargeable[1]
 						parentGoalNode = currentGoalNode
 						currentGoalIndex = 1
 					end
+				-- Goal seguinte.
 				else
 					currentGoalNode = LogicModule.dischargeable[currentGoalIndex + 1]
 					parentGoalNode = currentGoalNode
