@@ -409,6 +409,9 @@ function LogicModule.expandAll(agraph, natDNode)
 
 	while #openBranchesList > 0 do
 		currentNode = openBranchesList[1]
+		if currentNode:getInformation("Attempts") == nil then
+			currentNode:setInformation("Attempts", 0)
+		end
 
 		isReachable, ruleToApply = isGoalReachable(currentGoalNode, currentNode)
 
@@ -454,13 +457,23 @@ function LogicModule.expandAll(agraph, natDNode)
 				currentGoalNode = currentGoalNode:getEdgeOut(lblEdgeDir):getDestino()
 
 			-- Não sendo uma implicação, partimos para o Goal seguinte. Não havendo um Goal seguinte,
-			-- podemos concluir que a prova não é válida.
-			-- TODO verificar se podemos ter essa certeza.
+			-- voltamos ao inicial.
+			-- Caso não seja possível continuar aprova após mais de duas passadas para esse currentNode,
+			-- temor que o teorema não é válido.
+			-- TODO podemos ter essa certeza?
 			else
 				if currentGoalIndex + 1 > #LogicModule.dischargeable then
-					logger:info("INFO - A prova não pôde ser concluída. Teorema não válido.")
-					currentNode:setInformation("Invalid", true)
-					return false, graph
+					if currentNode:getInformation("Attempts") > 2 then 
+						logger:info("INFO - A prova não pôde ser concluída. Teorema não válido.")
+						currentNode:setInformation("Invalid", true)
+						return false, graph
+
+					else
+						currentNode:setInformation("Attempts", currentNode:getInformation("Attempts") + 1)
+						currentGoalNode = LogicModule.dischargeable[1]
+						parentGoalNode = currentGoalNode
+						currentGoalIndex = 1
+					end
 				else
 					currentGoalNode = LogicModule.dischargeable[currentGoalIndex + 1]
 					parentGoalNode = currentGoalNode

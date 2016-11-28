@@ -356,7 +356,7 @@ local function showInputTextEvent()
    love.graphics.setFont(font)  
    love.graphics.printf(text, 0, 0, love.graphics.getWidth())
 
-   local y = 200
+   local y = 180
    local i = 1
    formulas = {}
    function Formula(f)

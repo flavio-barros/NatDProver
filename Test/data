@@ -1,3 +1,8 @@
+
+
+
+Formula{"Fibonacci3", "(A1 imp (A2)) imp (((A1 imp (A2 imp (A3)))) imp (A1 imp (A3)))"}
+
 Formula{"Valid1", "(A imp (B)) imp ((B imp (C)) imp (B imp (D imp (C))))"}
 Formula{"Valid2", "A imp ((A imp (p)) imp ((q imp (q)) imp (p)))"}
 Formula{"Valid3", "(B imp ((C imp (A)))) imp ((A imp (B)) imp ((A imp (C)) imp ((A imp (C)))))"}
