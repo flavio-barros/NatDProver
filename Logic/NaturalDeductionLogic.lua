@@ -30,6 +30,8 @@ local graph = nil
 local currentStepNumber = 0
 -- Contagem das →-Elim
 local elimIndex = 0
+-- Array com os nós que representam átomos
+local atoms = {}
 
 -- Lista das hipóteses a serem descartadas.
 -- Uma hipótese é um predicado lógico. Na prática, essa lista contém os
@@ -124,6 +126,8 @@ local function createGraphFormula(formulasTable, letters)
 	
 		nodes = {NodeLetter}
 		edges = {}
+
+		NodeLetter:setInformation("nextDED", 1)
 		
 		FormulaGraph:addNodes(nodes)
 		FormulaGraph:addEdges(edges)
@@ -140,6 +144,8 @@ local function createGraphFormula(formulasTable, letters)
 
 		nodes = {NodeImp}
 		edges = {EdgeEsq, EdgeDir}
+
+		NodeImp:setInformation("nextDED", 1)
 
 		FormulaGraph:addNodes(S1.nodes)
 		FormulaGraph:addNodes(S2.nodes)
@@ -161,6 +167,8 @@ local function createGraphNatD(form_table, letters)
 	local S,L
 	local NodeGG = NatDNode:new(lblNodeGG)
 	S,L = createGraphFormula(form_table, letters)
+
+	atoms = L
 
 	local newEdge = NatDEdge:new(lblRootEdge, NodeGG, S.root)
 
@@ -188,7 +196,7 @@ local function applyImplyIntroRule(formulaNode)
 
 	-- Nós e arestas novos.
 	local introStepNode = NatDNode:new(lblRuleImpIntro)
-	local introStepEdge = NatDEdge:new(lblEdgeDeduction, formulaNode, introStepNode)
+	local introStepEdge = NatDEdge:new(lblEdgeDeduction..formulaNode:getInformation("nextDED"), formulaNode, introStepNode)
 	local hypothesisEdge = NatDEdge:new(lblEdgeHypothesis, introStepNode, impLeft)
 	local predicateEdge = NatDEdge:new(lblEdgePredicate, introStepNode, impRight)
 
@@ -224,8 +232,9 @@ local function applyImplyIntroRule(formulaNode)
 
 	-- Remove o nó corrente da lista de ramos abertos.
 	removeOpenBranch(formulaNode)
+	formulaNode:setInformation("nextDED", formulaNode:getInformation("nextDED") + 1)
 
-	return graph
+	return graph, formulaNode:getInformation("nextDED") - 1
 end
 
 -- Função que aplica a →-Elim em formulaNode.
@@ -285,7 +294,7 @@ local function applyImplyElimRule(formulaNode, hypNode, implyNode)
 	end
 
 	elimStepNode = NatDNode:new(lblRuleImpElim)
-	elimStepEdge = NatDEdge:new(lblEdgeDeduction, formulaNode, elimStepNode)
+	elimStepEdge = NatDEdge:new(lblEdgeDeduction..formulaNode:getInformation("nextDED"), formulaNode, elimStepNode)
 	predicateHypEdge = NatDEdge:new(lblEdgePredicate.."1", elimStepNode, hypothesisNode)
 	predicateImpEdge = NatDEdge:new(lblEdgePredicate.."2", elimStepNode, impNode)
 
@@ -329,8 +338,9 @@ local function applyImplyElimRule(formulaNode, hypNode, implyNode)
 
 	-- Remove o nó corrente da lista de ramos abertos.
 	removeOpenBranch(formulaNode)
+	formulaNode:setInformation("nextDED", formulaNode:getInformation("nextDED") + 1)
 
-	return graph
+	return graph, formulaNode:getInformation("nextDED") - 1
 end
 
 function LogicModule.expandImplyIntroRule(agraph, formulaNode)
@@ -372,10 +382,12 @@ function LogicModule.createGraphFromTable(form_table)
 	return graph
 end
 
--- TODO aqui aplicar todos os implyintro e implyelim
+-- Função principal do módulo, que realiza a expansão geral dos nós do grafo.
 function LogicModule.expandAll(agraph, natDNode)
 
 	graph = agraph
+
+	local deductionStep = 1
 
 	-- Começar a prova pelo nó inicial caso não tenha sido dado um nó
 	local currentNode = natDNode
@@ -385,11 +397,11 @@ function LogicModule.expandAll(agraph, natDNode)
 
 	-- Primeiros passos: realizar repetidamente ImpIntros até não ter mais uma implicação
 	while currentNode:getInformation("type") == opImp.graph do
-		graph = applyImplyIntroRule(currentNode)
+		graph, deductionStep = applyImplyIntroRule(currentNode)
 		if #openBranchesList == 0 then
 			break
 		else
-			currentNode = currentNode:getEdgeOut(lblEdgeDeduction):getDestino():getEdgeOut(lblEdgePredicate):getDestino()
+			currentNode = currentNode:getEdgeOut(lblEdgeDeduction..deductionStep):getDestino():getEdgeOut(lblEdgePredicate):getDestino()
 		end
 	end
 
@@ -412,9 +424,7 @@ function LogicModule.expandAll(agraph, natDNode)
 		if currentNode:getInformation("Attempts") == nil then
 			currentNode:setInformation("Attempts", 0)
 		end
-
-		print(currentNode:getLabel())
-		print(currentGoalNode:getLabel().."\n")
+		
 		isReachable, ruleToApply = isGoalReachable(currentGoalNode, currentNode)
 
 		if isReachable then 
@@ -423,23 +433,23 @@ function LogicModule.expandAll(agraph, natDNode)
 			-- para ser o nó maior da →-Elim.
 			if currentNode:getInformation("type") ~= opImp.graph then
 				if currentGoalNode:getInformation("type") == opImp.graph then
-					graph = applyImplyElimRule(currentNode, nil, currentGoalNode)
+					graph, deductionStep = applyImplyElimRule(currentNode, nil, currentGoalNode)
 				else
-					graph = applyImplyElimRule(currentNode, currentGoalNode, nil)
+					graph, deductionStep = applyImplyElimRule(currentNode, currentGoalNode, nil)
 				end
 
 			-- Nó de implicação. Devemos decidir entre ImpElim ou ImpIntro.
 			else
 				if ruleToApply == lblRuleImpIntro then
-					graph = applyImplyIntroRule(currentNode)
+					graph, deductionStep = applyImplyIntroRule(currentNode)
 
 				-- TODO verificar se nesse caso é sempre esse tratamento
 				elseif ruleToApply == lblRuleImpElim then
 					if currentGoalNode:getInformation("type") == opImp.graph then
-						graph = applyImplyElimRule(currentNode, nil, currentGoalNode)
+						graph, deductionStep = applyImplyElimRule(currentNode, nil, currentGoalNode)
 
 					else
-						graph = applyImplyElimRule(currentNode, currentGoalNode, nil)
+						graph, deductionStep = applyImplyElimRule(currentNode, currentGoalNode, nil)
 					end
 				
 				else
@@ -466,12 +476,19 @@ function LogicModule.expandAll(agraph, natDNode)
 				if currentGoalIndex + 1 > #LogicModule.dischargeable then
 					-- Nesse caso, aplicar a regra de →-Intro.
 					if currentNode:getInformation("type") == opImp.graph then
-						graph = applyImplyIntroRule(currentNode)
+						graph, deductionStep = applyImplyIntroRule(currentNode)
 						currentGoalNode = parentGoalNode
 
-					elseif currentNode:getInformation("Attempts") > 2 then 
+					-- O número máximo de tentativas é 2^{i}, onde i é o número de fórmulas atômicas.	
+					-- doi do artigo fonte: j.entcs.2015.06.004 
+					elseif currentNode:getInformation("Attempts") > math.pow(2, #atoms) then 
 						logger:info("INFO - A prova não pôde ser concluída. Teorema não válido.")
 						currentNode:setInformation("Invalid", true)
+
+						-- Reseta os valores de nextDED dos nós para imprimir
+						for i, node in ipairs(graph:getNodes()) do
+							node:setInformation("nextDED", 1)
+						end
 						return false, graph
 
 					-- Voltamos ao primeiro Goal.
@@ -493,6 +510,10 @@ function LogicModule.expandAll(agraph, natDNode)
 		print(#openBranchesList)
 	end
 
+	-- Reseta os valores de nextDED dos nós para imprimir
+	for i, node in ipairs(graph:getNodes()) do
+		node:setInformation("nextDED", 1)
+	end
 	return true, graph
 end
 

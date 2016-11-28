@@ -21,8 +21,10 @@ local function findInDischargeable(formulaNode)
 	for i, node in ipairs(LogicModule.dischargeable) do
 		if LogicModule.nodeEquals(node, formulaNode) then
 			dedNumber = i
+			break
 		end
 	end
+	
 	return dedNumber
 end
 
@@ -69,16 +71,23 @@ function printProofStep(natDNode, file)
 	local formula = ""
 
 	if natDNode ~= nil then
-
 		for i, edge in ipairs(natDNode:getEdgesOut()) do
 			-- Nó de implicação
 			if edge:getLabel() == lblEdgeEsq then
 				nodeEsq = edge:getDestino()
 			elseif edge:getLabel() == lblEdgeDir then
 				nodeDir = edge:getDestino()
-			elseif edge:getLabel() == lblEdgeDeduction then
+			elseif edge:getLabel() == lblEdgeDeduction..natDNode:getInformation("nextDED") then
 				stepDed = edge:getDestino()
 				rule = edge:getInformation("rule")
+				-- Altera a dedução caso haja uma outra dedução diferente partindo deste nó.
+				if natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1)) ~= nil then
+					natDNode:setInformation("nextDED", natDNode:getInformation("nextDED") + 1)
+				elseif natDNode:getInformation("nextDED") > 1 then
+					--natDNode:setInformation("isProved", true)
+					natDNode:setInformation("nextDED", 1)
+				end
+				break
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
 			elseif edge:getLabel() == lblEdgePredicate then
@@ -93,9 +102,9 @@ function printProofStep(natDNode, file)
 		end
 
 		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
-		if stepDed ~= nil and not stepDed:getInformation("wasPrinted") then
+		if stepDed ~= nil then
 			file:write("\\infer["..rule.."]\n")
-			
+
 			formula = printFormula(natDNode)
 			file:write("{"..formula.."}\n")
 
@@ -105,8 +114,6 @@ function printProofStep(natDNode, file)
 
 		-- É um nó de →-Intro. Basta delegar para o nó nodePred
 		elseif nodePred ~= nil then
-			natDNode:getInformation("wasPrinted")
-			
 			if nodePred:getInformation("Invalid") then file:write("{\\color{red}{\n") end
 
 			printProofStep(nodePred, file)
@@ -115,8 +122,6 @@ function printProofStep(natDNode, file)
 
 		-- É um nó de →-Elim. Basta delegar para os nós nodePred1 e nodePred2
 		elseif nodePred1 ~= nil and nodePred2 ~= nil then
-			natDNode:getInformation("wasPrinted")
-
 			if nodePred1:getInformation("Invalid") then file:write("{\\color{red}{\n") end
 
 			printProofStep(nodePred1, file)

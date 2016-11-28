@@ -22,6 +22,8 @@ local chi3 = "(((E imp ("..chi2..")) imp (E)) imp (E)) imp ("..chi2..")"
 
 local alpha1 = "((((A imp ("..chi1..")) imp (A)) imp (A)) imp ("..chi1..")) imp (C)"
 Formula{"HermannTest", alpha1}
+
+-- TODO corrIGIR O LOOP INFINITO AQUI
 local alpha2 = "((((A imp ("..chi2..")) imp (A)) imp (A)) imp ("..chi2..")) imp (C)"
 --Formula{"Valid-chi1", alpha2}
 local alpha3 = "((((A imp ("..chi3..")) imp (A)) imp (A)) imp ("..chi3..")) imp (C)"
