@@ -80,7 +80,7 @@ end
 -- Defining the NatDEdge, extends Edge
 NatDEdge = {}
 
---- If label is equals to "", then a number is created acording to the origin node edgeCount field.	
+--- If label is equal to "", then a number is created acording to the origin node edgeCount field.	
 function NatDEdge:new(label, origin, destination)
 
 	local edgeCount = nil

@@ -28,7 +28,7 @@ function Edge:new (label, origem, destino)
    return newEdge
 end
 
---- Define the label of the 
+--- Define the label of the edge
 function Edge:setLabel( label )
    assert( type(label) == "string" , "Edge:setLabel expects a string." )
    self.label = label
