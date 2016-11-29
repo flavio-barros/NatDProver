@@ -12,6 +12,8 @@ require "Logic/ConstantsForNatD"
 
 PrintModule = {}
 
+local currentIntro = 0
+
 -- Funções Locais
 
 -- Função auxiliar que procura por um nó do grafo na lista de hipóteses descartadas, retornando o índice.
@@ -95,6 +97,10 @@ function printProofStep(natDNode, file)
 				if natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1)) ~= nil then
 					natDNode:setInformation("nextDED", natDNode:getInformation("nextDED") + 1)
 				end
+
+				if rule:sub(11, 15) == "intro" then
+					currentIntro = tonumber(string.match (rule, "%d+"))
+				end 
 				break
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
@@ -110,8 +116,7 @@ function printProofStep(natDNode, file)
 		end
 
 		-- Nó de predicado lógico que não tem ramificações.
-		-- TODO verificar aqui a condição de parada
-		if natDNode:getInformation("discharged") then
+		if (natDNode:getInformation("discharged") == true and currentIntro >= findInDischargeable(natDNode)) or (natDNode:getInformation("Invalid") == true) then
 			formula = printFinalNode(natDNode)
 			file:write("{"..formula.."}\n")
 
