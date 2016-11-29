@@ -28,7 +28,7 @@ local function findInDischargeable(formulaNode)
 	return dedNumber
 end
 
--- Função que imprime uma fórmula em lógica minimal (atômica ou implicação).
+-- Função que returna uma string de fórmula em lógica minimal (atômica ou implicação).
 -- É recursiva, portanto podem haver implicações de implicações etc.
 function printFormula(formulaNode)
 	local ret = ""
@@ -64,6 +64,17 @@ function printFormula(formulaNode)
 	return ret
 end
 
+-- Função que retorna um string de nó de fim de ramo (aberto ou fechado).
+local function printFinalNode(natDNode)
+	local formula = printFormula(natDNode)
+
+	if natDNode:getInformation("discharged") then
+		formula = "["..formula.."]".."_{"..findInDischargeable(natDNode).."}"
+	end
+
+	return formula
+end
+
 -- Função que imprime um passo dedutivo do grafo.
 function printProofStep(natDNode, file)
 	local edge, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, stepDed = nil
@@ -83,9 +94,6 @@ function printProofStep(natDNode, file)
 				-- Altera a dedução caso haja uma outra dedução diferente partindo deste nó.
 				if natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1)) ~= nil then
 					natDNode:setInformation("nextDED", natDNode:getInformation("nextDED") + 1)
-				elseif natDNode:getInformation("nextDED") > 1 then
-					--natDNode:setInformation("isProved", true)
-					natDNode:setInformation("nextDED", 1)
 				end
 				break
 
@@ -101,8 +109,14 @@ function printProofStep(natDNode, file)
 			end
 		end
 
+		-- Nó de predicado lógico que não tem ramificações.
+		-- TODO verificar aqui a condição de parada
+		if natDNode:getInformation("discharged") then
+			formula = printFinalNode(natDNode)
+			file:write("{"..formula.."}\n")
+
 		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
-		if stepDed ~= nil then
+		elseif stepDed ~= nil then
 			file:write("\\infer["..rule.."]\n")
 
 			formula = printFormula(natDNode)
@@ -135,17 +149,6 @@ function printProofStep(natDNode, file)
 			printProofStep(nodePred2, file)
 
 			if nodePred2:getInformation("Invalid") then	file:write("}}\n") end
-
-		-- Nó de predicado lógico que não tem ramificações.
-		else
-			formula = printFormula(natDNode)
-
-			-- Caso a hipótese seja descartada
-			if natDNode:getInformation("discharged") then
-				formula = "["..formula.."]".."_{"..findInDischargeable(natDNode).."}"
-			end
-
-			file:write("{"..formula.."}\n")
 
 		end
 	end

@@ -15,7 +15,7 @@ Formula{"Valid6", "(q imp (p)) imp (q imp (p))"}
 Formula{"Valid7", "(q imp (p)) imp (p imp (p))"}
 Formula{"Valid8", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
 
--- Chi Formulas: 
+-- Chi Formulas:
 local chi1 = "C"
 local chi2 = "(((D imp (C)) imp (D)) imp (D)) imp (C)"
 local chi3 = "(((E imp ("..chi2..")) imp (E)) imp (E)) imp ("..chi2..")"

@@ -216,10 +216,11 @@ local function applyImplyIntroRule(formulaNode)
 	logger:info("applyImplyIntroRule - "..formulaNode:getLabel().." was expanded")
 
 	-- Aqui verificamos se o nó presente na parte superior da prova pode ser hipótese a descartar.
+	introStepNode:setInformation("isClosed", true)
 	impRight:setInformation("discharged", false)
 	for i, node in ipairs(LogicModule.dischargeable) do
 		if LogicModule.nodeEquals(node, impRight) then
-			impRight:setInformation("isExpanded", true)
+			introStepNode:setInformation("isClosed", true)
 			impRight:setInformation("discharged", true)
 			break
 		end
@@ -314,14 +315,16 @@ local function applyImplyElimRule(formulaNode, hypNode, implyNode)
 	logger:info("applyImplyElimRule - "..formulaNode:getLabel().." was expanded")
 
 	-- Aqui verificamos se os nós presentes na parte superior da prova podem ser hipóteses a descartar.
+	elimStepNode:setInformation("isLeftClosed", false)
+	elimStepNode:setInformation("isRightClosed", false)
 	hypothesisNode:setInformation("discharged", false)
 	impNode:setInformation("discharged", false)
 	for i, node in ipairs(LogicModule.dischargeable) do
 		if LogicModule.nodeEquals(node, hypothesisNode) then
-			hypothesisNode:setInformation("isExpanded", true)
+			elimStepNode:setInformation("isLeftClosed", true)
 			hypothesisNode:setInformation("discharged", true)
 		elseif LogicModule.nodeEquals(node, impNode) then
-			impNode:setInformation("isExpanded", true)
+			elimStepNode:setInformation("isRightClosed", true)
 			impNode:setInformation("discharged", true)
 		end
 	end
