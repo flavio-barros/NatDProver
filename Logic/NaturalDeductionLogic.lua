@@ -511,6 +511,9 @@ function LogicModule.expandAll(agraph, natDNode)
 		end
 
 		print(#openBranchesList)
+		if #openBranchesList == 0 then
+			print("Todos os ramos fecharam!")
+		end
 	end
 
 	-- Reseta os valores de nextDED dos nós para imprimir
