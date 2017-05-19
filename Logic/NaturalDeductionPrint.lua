@@ -79,20 +79,17 @@ end
 
 -- Função que imprime um passo dedutivo do grafo.
 function printProofStep(natDNode, file)
-	local edge, nodeEsq, nodeDir, nodePred, nodePred1, nodePred2, stepDed = nil
+	local edge, nodePred, nodePred1, nodePred2, stepDed = nil
 	local rule = ""
 	local formula = ""
 
 	if natDNode ~= nil then
 		for i, edge in ipairs(natDNode:getEdgesOut()) do
-			-- Nó de implicação
-			if edge:getLabel() == lblEdgeEsq then
-				nodeEsq = edge:getDestino()
-			elseif edge:getLabel() == lblEdgeDir then
-				nodeDir = edge:getDestino()
-			elseif edge:getLabel() == lblEdgeDeduction..natDNode:getInformation("nextDED") then
+			-- Nó de implicação ou atômico que apresenta uma dedução
+			if edge:getLabel() == lblEdgeDeduction..natDNode:getInformation("nextDED") then
 				stepDed = edge:getDestino()
 				rule = edge:getInformation("rule")
+				print(natDNode:getInformation("nextDED"))
 				-- Altera a dedução caso haja uma outra dedução diferente partindo deste nó.
 				if natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1)) ~= nil then
 					natDNode:setInformation("nextDED", natDNode:getInformation("nextDED") + 1)
@@ -100,7 +97,7 @@ function printProofStep(natDNode, file)
 
 				if rule:sub(11, 15) == "intro" then
 					currentIntro = tonumber(string.match (rule, "%d+"))
-				end 
+				end
 				break
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
@@ -115,10 +112,19 @@ function printProofStep(natDNode, file)
 			end
 		end
 
-		-- Nó de predicado lógico que não tem ramificações.
-		if (natDNode:getInformation("discharged") == true and currentIntro >= findInDischargeable(natDNode)) or (natDNode:getInformation("Invalid") == true) then
+		-- Nó de predicado lógico que não tem ramificações, descartado.
+		if (natDNode:getInformation("discharged") == true and currentIntro >= findInDischargeable(natDNode)) then
 			formula = printFinalNode(natDNode)
 			file:write("{"..formula.."}\n")
+
+		-- Nó de predicado lógico que não ramifica mas não foi descartado
+		elseif natDNode:getInformation("Invalid") == true and (natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1) == nil) or natDNode:getEdgeOut(lblEdgeDeduction.."1") == nil) then
+			file:write("{\\color{red}{\n")
+
+			formula = printFinalNode(natDNode)
+			file:write("{"..formula.."}\n")
+			
+			file:write("}}\n")
 
 		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
 		elseif stepDed ~= nil then
@@ -133,27 +139,15 @@ function printProofStep(natDNode, file)
 
 		-- É um nó de →-Intro. Basta delegar para o nó nodePred
 		elseif nodePred ~= nil then
-			if nodePred:getInformation("Invalid") then file:write("{\\color{red}{\n") end
-
 			printProofStep(nodePred, file)
-
-			if nodePred:getInformation("Invalid") then file:write("}}\n") end
 
 		-- É um nó de →-Elim. Basta delegar para os nós nodePred1 e nodePred2
 		elseif nodePred1 ~= nil and nodePred2 ~= nil then
-			if nodePred1:getInformation("Invalid") then file:write("{\\color{red}{\n") end
-
 			printProofStep(nodePred1, file)
-
-			if nodePred1:getInformation("Invalid") then file:write("}}\n") end
-
+			
 			file:write("&\n")
 
-			if nodePred2:getInformation("Invalid") then file:write("{\\color{red}{\n") end
-
 			printProofStep(nodePred2, file)
-
-			if nodePred2:getInformation("Invalid") then	file:write("}}\n") end
 
 		end
 	end

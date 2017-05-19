@@ -186,6 +186,8 @@ local function createGraphNatD(form_table, letters)
 	return NatDGraph
 end
 
+-- TODO ⊥ classico, ⊥ intuicionista, ¬ intro e ¬ elim.
+
 -- Aplica a regra de introdução da implicação no nó selecionado, adicionando um elemento à lista
 -- de hipóteses para descarte posterior.
 local function applyImplyIntroRule(formulaNode)
@@ -351,7 +353,8 @@ function LogicModule.expandImplyIntroRule(agraph, formulaNode)
 
 	graph = agraph
 	if typeOfNode == opImp.graph then
-		impIntro(formulaNode)
+		graph = applyImplyIntroRule(formulaNode)
+		print_all()
 	else
 		logger:info("WARNING - ImpIntro used on an non-implication node.")
 	end
@@ -362,7 +365,8 @@ end
 function LogicModule.expandImplyElimRule(agraph, formulaNode, hypothesisNode)
 
 	graph = agraph
-	impElim(formulaNode, hypothesisNode)
+	graph = applyImplyElimRule(formulaNode, hypothesisNode)
+	print_all()
 
 	return true, graph	
 end
@@ -391,6 +395,7 @@ function LogicModule.expandAll(agraph, natDNode)
 	graph = agraph
 
 	local deductionStep = 1
+	local numBla = 0
 
 	-- Começar a prova pelo nó inicial caso não tenha sido dado um nó
 	local currentNode = natDNode
@@ -436,6 +441,9 @@ function LogicModule.expandAll(agraph, natDNode)
 			-- para ser o nó maior da →-Elim.
 			if currentNode:getInformation("type") ~= opImp.graph then
 				if currentGoalNode:getInformation("type") == opImp.graph then
+					--print("ping")
+					--print(currentNode:getLabel())
+					--print(currentGoalNode:getLabel())
 					graph, deductionStep = applyImplyElimRule(currentNode, nil, currentGoalNode)
 				else
 					graph, deductionStep = applyImplyElimRule(currentNode, currentGoalNode, nil)
@@ -444,8 +452,28 @@ function LogicModule.expandAll(agraph, natDNode)
 			-- Nó de implicação. Devemos decidir entre ImpElim ou ImpIntro.
 			else
 				if ruleToApply == lblRuleImpIntro then
+					--print("pong")
+					--print(currentNode:getLabel())
+					--print(currentGoalNode:getLabel())
 					graph, deductionStep = applyImplyIntroRule(currentNode)
+					--[[numBla = numBla + 1
+					if numBla > 5 then
+						logger:info("INFO - A prova não pôde ser concluída. Teorema não válido.")
+						currentNode:setInformation("Invalid", true)
 
+						-- Marca os demais nós abertos como inválidos
+						for i, node in ipairs(openBranchesList) do
+							node:setInformation("Invalid", true)
+						end
+
+						print(numBla)
+						-- Reseta os valores de nextDED dos nós para imprimir
+						for i, node in ipairs(graph:getNodes()) do
+							node:setInformation("nextDED", 1)
+						end
+						return false, graph
+					end
+					--]]
 				-- TODO verificar se nesse caso é sempre esse tratamento
 				elseif ruleToApply == lblRuleImpElim then
 					if currentGoalNode:getInformation("type") == opImp.graph then
@@ -467,6 +495,9 @@ function LogicModule.expandAll(agraph, natDNode)
 		-- Subgoal: o nó à direita da implicação do goal atual.
 		else
 			if currentGoalNode:getInformation("type") == opImp.graph then
+				--print("pang")
+				--print(currentNode:getLabel())
+				--print(currentGoalNode:getLabel())
 				parentGoalNode = currentGoalNode
 				currentGoalNode = currentGoalNode:getEdgeOut(lblEdgeDir):getDestino()
 
@@ -483,10 +514,15 @@ function LogicModule.expandAll(agraph, natDNode)
 						currentGoalNode = parentGoalNode
 
 					-- O número máximo de tentativas é 2^{i}, onde i é o número de fórmulas atômicas.	
-					-- doi do artigo fonte: j.entcs.2015.06.004 
+					-- doi do artigo fonte: j.entcs.2015.06.004
 					elseif currentNode:getInformation("Attempts") > math.pow(2, #atoms) then 
 						logger:info("INFO - A prova não pôde ser concluída. Teorema não válido.")
 						currentNode:setInformation("Invalid", true)
+
+						-- Marca os demais nós abertos como inválidos
+						for i, node in ipairs(openBranchesList) do
+							node:setInformation("Invalid", true)
+						end
 
 						-- Reseta os valores de nextDED dos nós para imprimir
 						for i, node in ipairs(graph:getNodes()) do
@@ -509,11 +545,6 @@ function LogicModule.expandAll(agraph, natDNode)
 				end
 			end
 		end
-
-		print(#openBranchesList)
-		if #openBranchesList == 0 then
-			print("Todos os ramos fecharam!")
-		end
 	end
 
 	-- Reseta os valores de nextDED dos nós para imprimir
@@ -526,6 +557,8 @@ end
 function LogicModule.getGraph()
 	return graph
 end
+
+local numRecursions = 0
 
 -- Função auxiliar recursiva para verificar igualdade de dois nós do grafo.
 -- Adaptada apenas para implicações e termos atômicos, utilizada principalmente
@@ -568,9 +601,18 @@ function LogicModule.nodeEquals(node1, node2)
 	elseif node1:getInformation("type") ~= opImp.graph then
 		return false
 
-	-- Passo indutivo
 	-- Ambos nós de implicação.
 	else
+		-- São a mesma implicação.
+		if node1:getLabel() == node2:getLabel() then
+			return true
+		end
+
+		numRecursions = numRecursions + 1
+		print(numRecursions)
+
+		-- São implicações diferentes.
+		-- Passo indutivo
 		for i, edge in ipairs(node1:getEdgesOut()) do
 			if edge:getLabel() == lblEdgeEsq then
 				node1Left = edge:getDestino()
@@ -587,6 +629,9 @@ function LogicModule.nodeEquals(node1, node2)
 			end
 		end
 		
+		print(node1:getLabel())
+		print(node2:getLabel())
+
 		return LogicModule.nodeEquals(node1Left, node2Left) and LogicModule.nodeEquals(node1Right, node2Right)
 	end
 end
@@ -594,16 +639,6 @@ end
 function load()
 	local f = loadfile("commands.lua")
 	f()
-end
-
-function impIntro(form)
-	graph = applyImplyIntroRule(form)
-	print_all()
-end
-
-function impElim(form, hypNode)
-	graph = applyImplyElimRule(form, hypNode)
-	print_all()
 end
 
 function run()

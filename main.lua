@@ -271,7 +271,9 @@ local function expandAll()
     if proofStarted() then
         local ret, graph = LogicModule.expandAll(NatDGraph)
         if ret == false then
-            print("\nProva Inválida!\n")
+                print("Ramos abertos ao fim da demonstração!")
+            else
+                print("Todos os ramos fecharam!")
         end
         NatDGraph = prepareGraphToDraw(graph)
     end

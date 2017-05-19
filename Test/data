@@ -5,6 +5,7 @@ local fib5 = fib4.." imp (((A3 imp (A4 imp (A5))))"
 local fib6 = fib5.." imp (((A4 imp (A5 imp (A6))))"
 local fib7 = fib6.." imp (((A5 imp (A6 imp (A7))))"
 
+Formula{"Fibonacci3", fib3.." imp (A1 imp (A3)))"}
 --Formula{"Fibonacci5", fib5.." imp (A1 imp (A5)))))"}
 --Formula{"Fibonacci6", fib6.." imp (A1 imp (A6))))))"}
 Formula{"Fibonacci7", fib7.." imp (A1 imp (A7)))))))"}
@@ -17,18 +18,20 @@ Formula{"Valid5", "(q imp (p)) imp (q imp (p))"}
 Formula{"Valid6", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
 
 -- Chi Formulas:
-local chi1 = "C"
-local chi2 = "(((D imp (C)) imp (D)) imp (D)) imp (C)"
-local chi3 = "(((E imp ("..chi2..")) imp (E)) imp (E)) imp ("..chi2..")"
+local chi1 = "B"
+local chi2 = "(((C imp ("..chi1..")) imp (C)) imp (C)) imp ("..chi1..")"
+local chi3 = "(((D imp ("..chi2..")) imp (D)) imp (D)) imp ("..chi2..")"
 
-local alpha1 = "((((A imp ("..chi1..")) imp (A)) imp (A)) imp ("..chi1..")) imp (C)"
+local alpha1 = "((((A imp ("..chi1..")) imp (A)) imp (A)) imp ("..chi1..")) imp (B)"
 Formula{"HermannTest", alpha1}
 
--- TODO CORRIGIR O LOOP INFINITO AQUI
-local alpha2 = "((((A imp ("..chi2..")) imp (A)) imp (A)) imp ("..chi2..")) imp (C)"
---Formula{"Valid-chi1", alpha2}
-local alpha3 = "((((A imp ("..chi3..")) imp (A)) imp (A)) imp ("..chi3..")) imp (C)"
+-- PATOLÓGICOS
+local alpha2 = "((((A imp ("..chi2..")) imp (A)) imp (A)) imp ("..chi2..")) imp (B)"
+Formula{"Valid-chi1", alpha2}
+local alpha3 = "((((A imp ("..chi3..")) imp (A)) imp (A)) imp ("..chi3..")) imp (B)"
 --Formula{"Valid-chi2", alpha3}
+
+Formula{"Lets see", "((((A imp (B)) imp (B)) imp (A)) imp (A))"}
 
 Formula{"Invalid1-peirce", "(((A imp (B)) imp (B)) imp (A))"}
 Formula{"Invalid2-dummet", "((p imp (q)) imp (r)) imp ((((q imp (p)) imp (r))) imp (r))"}
