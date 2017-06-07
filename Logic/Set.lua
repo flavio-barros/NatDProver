@@ -15,7 +15,7 @@ function Set:new (t)
    if t ~= nil then
       for _,v in pairs(t) do ini[v] = true end
    end
-   
+
    return setmetatable( ini, Set_Metatable )
 end
 
@@ -29,14 +29,14 @@ end
 
 function Set:union(set2)
    local s = Set:new()
-   
-   for k,v in pairs(self) do 
-      s[k] = true 
+
+   for k, _ in pairs(self) do 
+      s[k] = true
    end
-   
-   for k,v in pairs(set2) do 
-      s[k] = true 
+
+   for k, _ in pairs(set2) do 
+      s[k] = true
    end
-   
+
    return s
 end

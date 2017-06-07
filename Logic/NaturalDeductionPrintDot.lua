@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
---	Natural Deduction Print Module
+--	Natural Deduction Print Dot Module
 --
---	This module defines the functions for printing proofs in Latex.
+--	This module defines the functions for printing proofs in Dot.
 --
 --	@authors: bpalkmim
 --
@@ -11,12 +11,9 @@ require "Logic/NatDGraph"
 require "Logic/ConstantsForNatD"
 require "Logic/NaturalDeductionLogic"
 
-PrintModule = {}
-
-local currentIntro = 0
+PrintDotModule = {}
 
 -- Funções Locais
-
 -- Função auxiliar que procura por um nó do grafo na lista de hipóteses descartadas, retornando o índice.
 -- Caso não encontre, retorna zero.
 local function findInDischargeable(formulaNode)
@@ -50,14 +47,14 @@ local function printFormula(formulaNode)
 	if (nodeLeft ~= nil) and (nodeRight ~= nil) then
 		local printLeft = printFormula(nodeLeft)
 		local printRight = printFormula(nodeRight)
-		ret = ret.."("..printLeft.." "..opImp.tex.." "..printRight..")"
+		ret = ret.."("..printLeft.." \\\\to "..printRight..")" -- TODO verificar depois se isso funciona!
 
 	-- Verificação a fim de evitar imprimir o Label de um nó de Dedução (ImpIntro ou ImpElim).
 	elseif (#formulaNode:getLabel() >= 7) then
 		if (formulaNode:getLabel():sub(1, 7) ~= lblRuleImpIntro:sub(1, 7)) and (formulaNode:getLabel():sub(1, 7) ~= lblRuleImpElim) then
 			-- Nó atômico.
 			-- Vale notar que um nó atômico pode ter nós filhos, mas o único caso possível é
-			-- por uma aresta com label lblEdgeDed.
+			-- por uma aresta com label lblEdgeDed.."i", onde i vai de 1 ao número de deduções que partem do nó.
 			ret = ret.." "..formulaNode:getLabel().." "
 		end
 	else
@@ -75,13 +72,17 @@ local function printFinalNode(natDNode)
 		formula = "["..formula.."]".."_{"..findInDischargeable(natDNode).."}"
 	end
 
-	return formula
+	return "\""..formula.."\""
 end
 
 -- Função que imprime um passo dedutivo do grafo.
-local function printProofStep(natDNode, file)
-	local nodePred, nodePred1, nodePred2, stepDed = nil
-	local rule = ""
+local function printProofStep(natDNode, file, currentRule)
+	local nodePred, nodeHyp, nodePred1, nodePred2, stepDed, currentElim = nil
+	local currentIntro = 0
+
+	if currentRule == nil then currentRule = "" end
+
+	local rule = currentRule
 
 	if natDNode ~= nil then
 		for _, edge in ipairs(natDNode:getEdgesOut()) do
@@ -96,13 +97,20 @@ local function printProofStep(natDNode, file)
 				end
 
 				if rule:sub(11, 15) == "intro" then
-					currentIntro = tonumber(string.match (rule, "%d+"))
+					currentIntro = string.match (rule, "%d+")
+					rule = "Intro"..currentIntro
+					currentIntro = tonumber(currentIntro)
+				else -- Elim
+					currentElim = string.match (rule, "%d+")
+					rule = "Elim"..currentElim
 				end
 				break
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
 			elseif edge:getLabel() == lblEdgePredicate then
 				nodePred = edge:getDestino()
+			elseif edge:getLabel() == lblEdgeHypothesis then
+				nodeHyp = edge:getDestino()
 
 			-- Na →-Elim, temos duas arestas de predicado, enumeradas.
 			elseif edge:getLabel() == lblEdgePredicate.."1" then
@@ -112,71 +120,62 @@ local function printProofStep(natDNode, file)
 			end
 		end
 
-		-- Nó de predicado lógico que não tem ramificações, descartado.
+		-- Nó de predicado lógico que não tem ramificações, descartado. Em azul.
 		if (natDNode:getInformation("discharged") == true and currentIntro >= findInDischargeable(natDNode)) then
-			file:write("{"..printFinalNode(natDNode).."}\n")
+			file:write(printFinalNode(natDNode).." [color=blue];\n")
 
-		-- Nó de predicado lógico que não ramifica mas não foi descartado
+		-- Nó de predicado lógico que não ramifica mas não foi descartado. Em vermelho.
 		elseif natDNode:getInformation("Invalid") == true and (natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1) == nil) or natDNode:getEdgeOut(lblEdgeDeduction.."1") == nil) then
-			file:write("{\\color{red}{\n")
-
-			file:write("{"..printFinalNode(natDNode).."}\n")
-
-			file:write("}}\n")
+			file:write("\""..printFormula(natDNode).."\" [color=red];")
 
 		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
 		elseif stepDed ~= nil then
-			file:write("\\infer["..rule.."]\n")
+			file:write("\""..printFormula(natDNode).."\" -> \""..rule.."\";\n")
 
-			file:write("{"..printFormula(natDNode).."}\n")
+			printProofStep(stepDed, file, rule)
 
-			file:write("{")
-			printProofStep(stepDed, file)
-			file:write("}\n")
+		-- É um nó de →-Intro
+		-- Arestas indicando descarte de hipóteses estão em verde.
+		elseif nodePred ~= nil and nodeHyp ~= nil then
+			file:write("\""..rule.."\" -> \""..printFormula(nodeHyp).."\" [color=green];\n")
+			file:write("\""..rule.."\" -> \""..printFormula(nodePred).."\";\n")
 
-		-- É um nó de →-Intro. Basta delegar para o nó nodePred
-		elseif nodePred ~= nil then
-			printProofStep(nodePred, file)
+			printProofStep(nodePred, file, rule)
 
-		-- É um nó de →-Elim. Basta delegar para os nós nodePred1 e nodePred2
+		-- É um nó de →-Elim
 		elseif nodePred1 ~= nil and nodePred2 ~= nil then
-			printProofStep(nodePred1, file)
+			file:write("\""..rule.."\" -> \""..printFormula(nodePred1).."\";\n")
+			file:write("\""..rule.."\" -> \""..printFormula(nodePred2).."\";\n")
 
-			file:write("&\n")
-
-			printProofStep(nodePred2, file)
+			printProofStep(nodePred1, file, rule)
+			printProofStep(nodePred2, file, rule)
 
 		end
 	end
 end
 
--- Função pública
+-- Função Pública
 -- Função principal do módulo. Chama a função recursiva printProofStep.
+-- As arestas de demonstração da prova serão as "principais" e as demais, secundárias.
 -- @param agraph Grafo da prova.
 -- @param nameSufix Sufixo para identificação da prova.
--- @return true caso a o grafo seja válido e a prova tenha sido escrita
-function PrintModule.printProof(agraph, nameSufix)
+-- @return true caso tenha recebido um grafo válido e escrito a prova.
+function PrintDotModule.printProofDot(agraph, nameSufix)
 
 	if nameSufix == nil then nameSufix = "" end
 
-	local file = io.open("aux/prooftree"..nameSufix..".tex", "w")
+	local file = io.open("aux/prooftreeDot"..nameSufix..".dot", "w")
 	local ret = false
 
 	if agraph ~= nil then
 
 		local step = agraph:getNode(lblNodeGG):getEdgeOut(lblRootEdge):getDestino()
 
-		file:write("\\documentclass[landscape]{article}\n\n")
-		file:write("\\usepackage{color}\n")
-		file:write("\\usepackage{proof}\n")
-		file:write("\\usepackage{qtree}\n\n")
-		file:write("\\begin{document}\n")
-		file:write("$$\n")
+		file:write("digraph prooftreeDot"..nameSufix.." {\n")
 
 		printProofStep(step, file)
 
-		file:write("$$\n")
-		file:write("\\end{document}\n")
+		file:write("}\n")
 		file:close()
 
 		ret = true

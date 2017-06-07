@@ -9,18 +9,14 @@
 
 require "Logic/NatDGraph"
 require "Logic/ConstantsForNatD"
-require "Logic/NaturalDeductionPrint"
 require "logging"
 require "logging.file"
---require "Util/utility"
 
 local logger = logging.file("aux/prover%s.log", "%Y-%m-%d")
 logger:setLevel(logging.INFO)
 
 LogicModule = {}
 
--- Lista com os Goals/subgoals
-local goalsList = nil
 -- Lista dos ramos ativos no momento
 local openBranchesList = {}
 -- O grafo em si (global ao módulo)
@@ -33,7 +29,7 @@ local elimIndex = 0
 -- Array com os nós que representam átomos
 local atoms = {}
 
--- Lista das hipóteses a serem descartadas.
+-- Lista das hipóteses a serem descartadas (também chamados de Goals).
 -- Uma hipótese é um predicado lógico. Na prática, essa lista contém os
 -- nós do grafo da prova.
 LogicModule.dischargeable = {}
@@ -179,7 +175,6 @@ local function createGraphNatD(form_table, letters)
 	NatDGraph:addEdges(edges)
 	NatDGraph:addEdges(S.edges)
 
-	goalsList = {}
 	currentStepNumber = 0
 	elimIndex = 0
 
@@ -220,7 +215,7 @@ local function applyImplyIntroRule(formulaNode)
 	-- Aqui verificamos se o nó presente na parte superior da prova pode ser hipótese a descartar.
 	introStepNode:setInformation("isClosed", true)
 	impRight:setInformation("discharged", false)
-	for i, node in ipairs(LogicModule.dischargeable) do
+	for _, node in ipairs(LogicModule.dischargeable) do
 		if LogicModule.nodeEquals(node, impRight) then
 			introStepNode:setInformation("isClosed", true)
 			impRight:setInformation("discharged", true)
@@ -359,7 +354,7 @@ function LogicModule.expandImplyIntroRule(agraph, formulaNode)
 		logger:info("WARNING - ImpIntro used on an non-implication node.")
 	end
 
-	return true, graph	
+	return true, graph
 end
 
 function LogicModule.expandImplyElimRule(agraph, formulaNode, hypothesisNode)
@@ -368,7 +363,7 @@ function LogicModule.expandImplyElimRule(agraph, formulaNode, hypothesisNode)
 	graph = applyImplyElimRule(formulaNode, hypothesisNode)
 	print_all()
 
-	return true, graph	
+	return true, graph
 end
 
 -- Public functions

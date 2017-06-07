@@ -8,15 +8,10 @@
 -------------------------------------------------------------------------------
 
 require "Logic/Set"
-require "logging" 
-require "logging.file"
 
 local lpeg = require "lpeg"
 local atom_count = 0
 local mimp_t = Set:new()
-local logger = logging.file("aux/prover%s.log", "%Y-%m-%d")
-logger:setLevel(logging.INFO)
-
 
 -- Parsing functions
 local function table_atom(x)

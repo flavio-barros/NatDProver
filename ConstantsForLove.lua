@@ -44,6 +44,7 @@ expandAllButtonName = "Expand All"
 inputFormulaButtonName = "Input Formula"
 expandFormulaButtonName = "Expand Formula"
 printProofButtonName = "Print Proof"
+printProofDotButtonName = "Print as DOT"
 buttonTime = 0.15
 
 -- Editing States

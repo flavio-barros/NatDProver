@@ -19,6 +19,8 @@ Luasocket is a library for socket communication in Lua. It can be installed usin
 
 Lpeg is a pattern-matching library for Lua. We use lpeg to parse input formulae in our prover. It also can be installed using [luarocks](http://luarocks.org/).
 
+Also, if you want to output to dot, I recommend you install graphviz ().
+
 Usage
 =====
 

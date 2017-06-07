@@ -23,13 +23,13 @@ end
 function os.showProofOnBrowser(nameSufix)
 
     if nameSufix == nil then nameSufix = "" end
-   
+
     os.execute("pdflatex -output-directory=aux aux/prooftree.tex")
-    
+
     os.execute("htlatex aux/prooftree"..nameSufix..".tex '' '' -daux/")
 
     if os.capture() == "Darwin" then
-        os.execute("open aux/prooftree"..nameSufix..".html")                                        
+        os.execute("open aux/prooftree"..nameSufix..".html")
     elseif os.capture() == "Linux" then
         os.execute("xdg-open aux/prooftree"..nameSufix..".html")
     else
@@ -37,4 +37,12 @@ function os.showProofOnBrowser(nameSufix)
     end
 
     os.execute("rm -f prooftree*")
+end
+
+function os.showProofDotOnBrowser(nameSufix)
+
+    if nameSufix == nil then nameSufix = "" end
+
+    os.execute("dot -Tpng aux/prooftreeDot"..nameSufix..".dot -o aux/prooftreeDot"..nameSufix..".png")
+
 end

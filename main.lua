@@ -11,8 +11,10 @@ require 'ConstantsForLove'
 require 'Util/utility'
 require 'Logic/NaturalDeductionLogic'
 require 'ParseInput'
+require 'Logic/NaturalDeductionPrint'
+require 'Logic/NaturalDeductionPrintDot'
 require 'logging.file'
-require 'io' 
+require 'io'
 
 -- Variáveis globais do modulo
 local logger, font
@@ -34,21 +36,21 @@ local function getInclinacaoAresta(edge)
    local invertSignal = 1 -- para saber para onde o angulo esta virado
    local x1, y1 = edge:getOrigem():getPosition()
    local x2, y2 = edge:getDestino():getPosition()
-   
+
    local a,b,c
-   
+
    -- Calculando o tamanho dos lados do triangulo retangulo que a aresta forma
    -- a = hipotenusa
    -- b e c catetos
    if x1 > x2 then
-      b = x1 - x2               
+      b = x1 - x2
    elseif x2 > x1 then
       b = x2 - x1
       x2Maiorx1 = true
    else
       return math.rad(-90) -- A aresta esta na vertical
    end
-   
+
    if y1 > y2 then
       c = y1 - y2
    elseif y2 > y1 then
@@ -57,14 +59,14 @@ local function getInclinacaoAresta(edge)
    else
       return math.rad(0) -- A aresta esta na horizontal
    end
-   
+
    -- Distancia entre 2 pontos
    a = math.pow(b,2) + math.pow(c,2)
    a = math.sqrt(a)
-   
+
    -- Lei dos cossenos
    inclinacao = math.acos( (math.pow(a,2) + math.pow(b,2) - math.pow(c,2))/ (2*a*b) )
-     
+
    -- Ajeitando a rotação para o lado correto
    if y2Maiory1 and x2Maiorx1 then
       invertSignal = 1
@@ -73,7 +75,7 @@ local function getInclinacaoAresta(edge)
    elseif x2Maiorx1 then
       invertSignal = -1
    end
-   
+
    return inclinacao * invertSignal
 end
 
@@ -92,7 +94,7 @@ local function applyForces(graph)
    repeat               
       total_kinetic_energy = 0
       for i=1, #nodes do
-         
+
          nodes[i]:setInformation("Fx",0.0)
          nodes[i]:setInformation("Fy",0.0)
          for j=1, #nodes do
@@ -111,10 +113,10 @@ local function applyForces(graph)
             local nodeD = edge:getDestino()
 
             if nodeO:getLabel() == nodes[i]:getLabel() or nodeD:getLabel() == nodes[i]:getLabel() then
-               local Xi=0
-               local Xj=0
-               local Yi=0
-               local Yj=0
+               local Xi = 0
+               local Xj = 0
+               local Yi = 0
+               local Yj = 0
                if nodeO:getLabel() == nodes[i]:getLabel() then
                   Xi,Yi = nodeO:getPosition()
                   Xj,Yj = nodeD:getPosition()
@@ -142,12 +144,12 @@ end
 
 --- Ela prepara as posições (x,y) de todos os vertices para que eles possam ser desenhados.
 local function prepareGraphToDraw(graph)
-   
+
    nodes = graph:getNodes()
-   
+
    posX = xBegin
    posY = yBegin
-   
+
    if nodes ~= nil then
       for  i = 1, #nodes do             
          if nodes[i]:getPosition() == nil then -- só atualiza os nós que nao tem posicao.                       
@@ -169,31 +171,31 @@ local function drawGraphEvent(graph)
    local i = 1
    
    assert( getmetatable(graph) == Graph_Metatable , "drawGraphEvent expects a graph.")
-   
+
    local nodes = graph:getNodes()
    local edges = graph:getEdges()
-   
+
    -- Desenha os vertices
    if nodes ~= nil then
       while i <= #nodes do
-         
+
          local node = nodes[i]
-         
+
          if isExpandingFormula then
-           if node:getInformation("isSelected") == true then 
+           if node:getInformation("isSelected") == true then
               love.graphics.setColor(255, 255, 0) -- Yellow circle
            end
          else        
            if node:getInformation("isProved") == nil then 
               love.graphics.setColor(204, 204, 204) -- Gray circle
-           elseif node:getInformation("isProved") == false then 
+           elseif node:getInformation("Invalid") == true then 
               love.graphics.setColor(255, 0, 0) -- Red circle
            elseif node:getInformation("isProved") == true then 
               love.graphics.setColor(0, 0, 255) -- Blue circle           
            end
            node:setInformation("isSelected", false)           
          end
-         
+
          if node:getInformation("found") == true then 
             love.graphics.setColor(255, 255, 0) -- Yellow circle
          end         
@@ -204,7 +206,7 @@ local function drawGraphEvent(graph)
             love.graphics.circle("line", node:getPositionX(), node:getPositionY(), 6)
             love.graphics.print(node:getLabel(), node:getPositionX() - 10, node:getPositionY() - circleSeparation , 0, escalaLetraVertice, escalaLetraVertice )
          end
-         
+
          i = i + 1
       end
    end
@@ -268,7 +270,7 @@ local function proofStarted()
 end
 
 local function expandAll()
-    if proofStarted() then
+if proofStarted() then
         local ret, graph = LogicModule.expandAll(NatDGraph)
         if ret == false then
                 print("Ramos abertos ao fim da demonstração!")
@@ -325,6 +327,16 @@ local function printProof()
 
         if ret then
             os.showProofOnBrowser()
+        end
+    end
+end
+
+local function printProofDot()
+    if proofStarted() then
+        ret = PrintDotModule.printProofDot(NatDGraph, "")
+
+        if ret then
+            os.showProofDotOnBrowser()
         end
     end
 end
@@ -449,7 +461,32 @@ local function printProofButtonEvent()
     love.graphics.printf({{0, 0, 0}, printProofButtonName}, xPos, yPos + 5, xLen, "center")
 end
 
--- Para testes.
+local function printProofDotButtonEvent()
+    local xPos = windowWidth - 60
+    local yPos = 140
+    local xLen = 55
+    local yLen = 40
+    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
+        if love.mouse.isDown(leftMouseButton) then
+            printProofDot()
+            love.timer.sleep(buttonTime)
+        end
+        love.graphics.setColor(100, 100, 200)
+    else
+        love.graphics.setColor(0, 100, 200)
+    end
+    love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
+    love.graphics.setColor(0, 0, 255)
+    love.graphics.setLineStyle("smooth")
+    love.graphics.line(xPos, yPos, xPos, yPos + yLen)
+    love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
+    love.graphics.setColor(255, 255, 255)
+    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
+    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
+    love.graphics.printf({{0, 0, 0}, printProofDotButtonName}, xPos, yPos + 5, xLen, "center")
+end
+
+--[[ Para testes.
 local function implyElimStepButtonEvent()
     local xPos = windowWidth - 60
     local yPos = 140
@@ -500,6 +537,7 @@ local function implyIntroStepButtonEvent()
     love.graphics.line(xPos, yPos, xPos + xLen, yPos)
     love.graphics.printf({{0, 0, 0}, "ImpIntro Step"}, xPos, yPos + 5, xLen, "center")
 end
+]]
 
 --- Esta função é chamada pela love.draw.
 -- A todo instante ela verifica se o botão esquerdo do mouse foi apertado. Em caso positivo 
@@ -564,15 +602,15 @@ end
 -- Public functions: Love events
 
 function love.keypressed(key)
-   if key == "a" and love.keyboard.isDown("lctrl") then
-      expandAll()
-   elseif key == "i" and love.keyboard.isDown("lctrl") then
-      inputFormula()
-   elseif key == "p" and love.keyboard.isDown("lctrl") then
-      printProof()
-   elseif key == "t" and love.keyboard.isDown("lctrl") then
-      inputCommand()   
-   end
+    if key == "a" and love.keyboard.isDown("lctrl") then
+        expandAll()
+    elseif key == "i" and love.keyboard.isDown("lctrl") then
+        inputFormula()
+    elseif key == "p" and love.keyboard.isDown("lctrl") then
+        printProof()
+    elseif key == "t" and love.keyboard.isDown("lctrl") then
+        inputCommand()   
+    end
 
    if editingState == InputingFormula then
       if key == "backspace" then
@@ -622,35 +660,36 @@ function love.textinput(t)
 end
 
 function love.load(arg)  
-   -- Prepare to debug in ZeroBrain
-   if arg[#arg] == "-debug" then
-      require("mobdebug").start()
-   end
+    -- Prepare to debug in ZeroBrain
+    if arg[#arg] == "-debug" then
+        require("mobdebug").start()
+    end
 
-   -- Log control
-   logger = logging.file("aux/prover%s.log", "%Y-%m-%d")
-   logger:setLevel(logging.DEBUG)
+    -- Log control
+    logger = logging.file("aux/prover%s.log", "%Y-%m-%d")
+    logger:setLevel(logging.DEBUG)
 
-   -- Love initial configuration
-   love.graphics.setBackgroundColor(255, 255, 255) -- White Color
-   love.graphics.setColor(0, 0, 0) -- Black Color
-   font = love.graphics.newFont(11)
-   isDragging = false
-   isExpandingFormula = false
+    -- Love initial configuration
+    love.graphics.setBackgroundColor(255, 255, 255) -- White Color
+    love.graphics.setColor(0, 0, 0) -- Black Color
+    font = love.graphics.newFont(11)
+    isDragging = false
+    isExpandingFormula = false
 
-   -- Initialize the proof graph
-   inputFormula()
+    -- Initialize the proof graph
+    inputFormula()
 end
 
 function love.draw()
-   showInputTextEvent()
-   expandAllButtonEvent()
-   inputFormulaButtonEvent()  
-   printProofButtonEvent()         
-   drawGraphEvent(NatDGraph)
-   dragNodeOrScreenOrSelectFocusEvent()         
+    showInputTextEvent()
+    expandAllButtonEvent()
+    inputFormulaButtonEvent()  
+    printProofButtonEvent()
+    printProofDotButtonEvent()      
+    drawGraphEvent(NatDGraph)
+    dragNodeOrScreenOrSelectFocusEvent()         
 end
 
 function graph()
-   drawGraphEvent(NatDGraph)
+    drawGraphEvent(NatDGraph)
 end

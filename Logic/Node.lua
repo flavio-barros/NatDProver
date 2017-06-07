@@ -31,13 +31,13 @@ function Node:new (label, x, y)
       xNotNil = true
    end
    
-   if y ~= nil then		
+   if y ~= nil then
       assert( type(y) == "number" , "Node:new expects a number, y is not a number.")
       yNotNil = true
    else
       assert( not xNotNil, "Node:new expects two positions, a number for de x axis and a number for the y axis.")
    end
-   
+
    if xNotNil and yNotNil then
       ini = {label = label, x = x, y = y, info = {}}
    elseif xNotNil then
@@ -47,7 +47,7 @@ function Node:new (label, x, y)
    else
       ini = {label = label, info = {}}
    end
-   
+
    return setmetatable( ini, Node_Metatable )
 end
 
@@ -270,35 +270,35 @@ function Node:deleteEdgeIn(edge)
    local isEdgeDeleted = false
    local positionOfTheEdge = nil
    local numEdges = #edgesIn
-   
+
    for i=1, numEdges do
       if edgesIn[i]:getOrigem():getLabel() == edge:getOrigem():getLabel() and edgesIn[i]:getDestino():getLabel() == edge:getDestino():getLabel()then
 	 -- achei a aresta
-	 edgesIn[i] = nil			
+	 edgesIn[i] = nil
 	 isEdgeDeleted = true
 	 positionOfTheEdge = i
-	 
+
 	 if i == numEdges then
 	    -- deletei do final, posso retornar
 	    return true
 	 end
-	 
-	 break			
+
+	 break
       end
    end
-   
+
    if isEdgeDeleted then
       -- nao é do final
       for i = positionOfTheEdge, numEdges do
 	 edgesIn[i] = edgesIn[i+1]
 	 edgesIn[i+1] = nil
-	 
+
 	 if i+1 == numEdges then
 	    -- chegamos no final
 	    return true
 	 end
       end
    end
-   
+
    return false
 end
