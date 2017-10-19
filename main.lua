@@ -293,11 +293,12 @@ end
 
 local function runInput()
    local parsed_formula = parse_input(input_formula)
+   print(parsed_formula)
    t_formula = convert_formula_totable(parsed_formula)
    
    local t_mimp_formula = implicational(t_formula)
    logger:info("inputFormula - alpha: "..convert_formula_tostring(t_mimp_formula))
-   
+   print(convert_formula_tostring(t_mimp_formula))
    NatDGraph = LogicModule.createGraphFromTable(t_mimp_formula)
    prepareGraphToDraw(NatDGraph)
 end
@@ -362,26 +363,27 @@ end
 -- Events functions
 
 local function showInputTextEvent()
-   -- Mudança necessária para Löve 0.10. Sem ela, o fundo ficava preto
-   love.graphics.clear(love.graphics.getBackgroundColor())
-   font = love.graphics.newFont(12)
+    -- Mudança necessária para Löve 0.10. Sem ela, o fundo ficava preto
+    love.graphics.clear(love.graphics.getBackgroundColor())
+    font = love.graphics.newFont(12)
 
-   love.graphics.setColor(0, 0, 255)
-   love.graphics.setFont(font)  
-   love.graphics.printf(text, 0, 0, love.graphics.getWidth())
+    love.graphics.setColor(0, 0, 255)
+    love.graphics.setFont(font)  
+    love.graphics.printf(text, 0, 0, love.graphics.getWidth())
 
-   local y = 180
-   local i = 1
-   formulas = {}
-   function Formula(f)
-      formulas[i] = f[2]
-      love.graphics.printf(i..") "..f[1].." "..f[2], 0, y + 30, love.graphics.getWidth())
-      y = y + 30
-      i = i + 1
-   end
 
-   --dofile("Test/data")
-   assert(love.filesystem.load("Test/data"))()
+    local y = yFormulas
+    local i = 1
+    formulas = {}
+    function Formula(f)
+    formulas[i] = f[2]
+        love.graphics.printf(i..") "..f[1].." "..f[2], 0, y + 30, love.graphics.getWidth())
+        y = y + 30
+        i = i + 1
+    end
+
+    --dofile("Test/data")
+    assert(love.filesystem.load("Test/data.lua"))()
 end
 
 local function expandAllButtonEvent()

@@ -16,6 +16,7 @@ xStep = 40
 yStep = 40
 xBegin = windowWidth / 2
 yBegin = 60
+yFormulas = 480
 
 -- Pan screen
 xInitial = 0

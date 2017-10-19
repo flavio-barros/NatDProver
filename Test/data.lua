@@ -13,7 +13,7 @@ Formula{"Fibonacci7", fib7.." imp (A1 imp (A7)))))))"}
 --Formula{"Valid1", "(A imp (B)) imp ((B imp (C)) imp (B imp (D imp (C))))"}
 --Formula{"Valid2", "(B imp ((C imp (A)))) imp ((A imp (B)) imp ((A imp (C)) imp ((A imp (C)))))"}
 --Formula{"Valid3", "(q imp (p imp (p))) imp (p imp (q imp (p)))"}
-Formula{"Valid4", "(A imp (B imp (C))) imp (B imp (A imp (C)))"}
+--Formula{"Valid4", "(A imp (B imp (C))) imp (B imp (A imp (C)))"}
 --Formula{"Valid5", "(q imp (p)) imp (q imp (p))"}
 --Formula{"Valid6", "A imp ((A imp (t)) imp ((t imp (r)) imp ((r imp (p)) imp (p))))"}
 
@@ -25,15 +25,14 @@ local chi3 = "(((D imp ("..chi2..")) imp (D)) imp (D)) imp ("..chi2..")"
 local alpha1 = "((((A imp ("..chi1..")) imp (A)) imp (A)) imp ("..chi1..")) imp (B)"
 Formula{"HermannTest", alpha1}
 
--- PATOLÓGICOS
 local alpha2 = "((((A imp ("..chi2..")) imp (A)) imp (A)) imp ("..chi2..")) imp (B)"
 --Formula{"Valid-chi1", alpha2}
 local alpha3 = "((((A imp ("..chi3..")) imp (A)) imp (A)) imp ("..chi3..")) imp (B)"
 --Formula{"Valid-chi2", alpha3}
 
-Formula{"Lets see", "((((A imp (B)) imp (B)) imp (A)) imp (A))"}
+--Formula{"Lets see", "((((A imp (B)) imp (B)) imp (A)) imp (A))"}
 
-Formula{"Invalid1-peirce", "(((A imp (B)) imp (B)) imp (A))"}
+--Formula{"Invalid1-peirce", "(((A imp (B)) imp (B)) imp (A))"}
 --Formula{"Invalid2-dummet", "((p imp (q)) imp (r)) imp ((((q imp (p)) imp (r))) imp (r))"}
 --Formula{"Invalid3", "(A imp (B)) imp (B imp (A))"}
 --Formula{"Invalid4", "A imp ((A imp (t)) imp (((t imp (r)) imp (q imp (r))) imp ((r imp (q)) imp (p))))"}

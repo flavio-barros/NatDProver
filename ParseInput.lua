@@ -19,6 +19,7 @@ local function table_atom(x)
 end
 
 local function table_formula(f)
+   print("First")
    if f.tag == "Atom" then 
       return("[ Atom "..table_atom(f[1]).." ]")
    elseif f.tag == "imp" then
@@ -65,14 +66,15 @@ local function print_ast(t)
 end
 
 local function table_formula(t)
+   print("Second")
    if type(t) == "number" then 
       return(t)
    elseif type(t) == "string" then
       return(string.format("%s", t))
    elseif type(t) == "table" then 
-      local s = "{ "
+      local s = "{ \n"
       for k,v in pairs(t) do
-	 s = s.."[ "..table_formula(k).."="..table_formula(v).." ]"
+	     s = s.."[ "..table_formula(k).."="..table_formula(v).." ]\n"
       end
       s = s.." }"
       return(s)
@@ -121,7 +123,7 @@ function parse_input(contents)
    local form, factor, term = lpeg.V("form"), lpeg.V("factor"), lpeg.V("term")
    local term_imp, term_and, term_or, term_bot, term_not = lpeg.V("term_imp"), lpeg.V("term_and"), lpeg.V("term_or"), lpeg.V("term_bot"), lpeg.V("term_not")
    local Atomo = taggedCap("Atom", token(Atom))
-   G = lpeg.P{ 
+   G = lpeg.P{
       formula,
       formula = skip * form * skip * -1;
       form = term + factor;
