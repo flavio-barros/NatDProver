@@ -1,0 +1,36 @@
+Wed Dec  6 17:42:39 2017 WARN Logger: changing loglevel from DEBUG to INFO
+Wed Dec  6 17:42:39 2017 INFO 
+
+Testes iniciados
+
+
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - A OK
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - AB OK
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - ABA OK
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - ABCBAC OK
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - vazio OK
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - Fib7 OK
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - HermannTest OK
+Wed Dec  6 17:42:39 2017 INFO Teste de grafo - Peirce OK
+
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - A OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - AB OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - ABA OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - ABCBAC OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - erro1 OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - erro2 OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - erro3 OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - erro4 OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - erro5 OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - Fib7 OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - HermannTest OK
+Wed Dec  6 17:42:39 2017 INFO Teste de parsing - Peirce OK
+
+Wed Dec  6 17:42:39 2017 INFO Teste Prova - A OK
+Wed Dec  6 17:42:39 2017 INFO Teste Prova - AB OK
+Wed Dec  6 17:42:39 2017 INFO Teste Prova - ABA OK
+Wed Dec  6 17:42:39 2017 INFO Teste Prova - ABCBAC OK
+Wed Dec  6 17:42:39 2017 INFO Teste Prova - Fib7 OK
+Wed Dec  6 17:42:39 2017 INFO Teste Prova - HermannTest OK
+Wed Dec  6 17:42:39 2017 INFO Teste Prova - Peirce OK
+

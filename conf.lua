@@ -1,4 +1,10 @@
-
+-----------------------------------------------------------------------------------
+-- Conf.lua
+--
+-- Arquivo com as configurações utilizadas pelo Löve.
+--
+-- @author: Bernardo Alkmim
+-----------------------------------------------------------------------------------
 
 function love.conf(t)
     t.identity = nil                   -- The name of the save directory (string)

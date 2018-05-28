@@ -14,8 +14,9 @@ require "Logic/NaturalDeductionLogic"
 PrintDotModule = {}
 
 -- Funções Locais
--- Função auxiliar que procura por um nó do grafo na lista de hipóteses descartadas, retornando o índice.
--- Caso não encontre, retorna zero.
+-- Função auxiliar que procura por um nó do grafo na lista de hipóteses descartadas.
+-- @param formulaNode Nó a ser buscado.
+-- @return Índice nas hipóteses descartadas. Zero caso não tehna sido encontrada.
 local function findInDischargeable(formulaNode)
 	local dedNumber = 0
 	for i, node in ipairs(LogicModule.dischargeable) do
@@ -30,6 +31,8 @@ end
 
 -- Função que returna uma string de fórmula em lógica minimal (atômica ou implicação).
 -- É recursiva, portanto podem haver implicações de implicações etc.
+-- @param formulaNode Fómula a ser impressa.
+-- @return String contendo a representação de formulaNode em DOT.
 local function printFormula(formulaNode)
 	local ret = ""
 	local nodeLeft, nodeRight = nil
@@ -47,7 +50,7 @@ local function printFormula(formulaNode)
 	if (nodeLeft ~= nil) and (nodeRight ~= nil) then
 		local printLeft = printFormula(nodeLeft)
 		local printRight = printFormula(nodeRight)
-		ret = ret.."("..printLeft.." \\\\to "..printRight..")" -- TODO verificar depois se isso funciona!
+		ret = ret.."("..printLeft.." -> "..printRight..")"
 
 	-- Verificação a fim de evitar imprimir o Label de um nó de Dedução (ImpIntro ou ImpElim).
 	elseif (#formulaNode:getLabel() >= 7) then
@@ -65,6 +68,8 @@ local function printFormula(formulaNode)
 end
 
 -- Função que retorna um string de nó de fim de ramo (aberto ou fechado).
+-- @param natDNode Nó da prova a ser impresso.
+-- @return String contendo a representação de natDNode em DOT.
 local function printFinalNode(natDNode)
 	local formula = printFormula(natDNode)
 
@@ -75,36 +80,25 @@ local function printFinalNode(natDNode)
 	return "\""..formula.."\""
 end
 
--- Função que imprime um passo dedutivo do grafo.
-local function printProofStep(natDNode, file, currentRule)
-	local nodePred, nodeHyp, nodePred1, nodePred2, stepDed, currentElim = nil
+-- Função que imprime um passo dedutivo do grafo. Vale notar que a função é recursiva.
+-- @param natDNode Nó a ser impresso.
+-- @param file Path do arquivo a ser criado.
+-- @param currentRule Regra atual sendo aplicada.
+-- @return String contendo a representação de natDNode em DOT.
+local function printProofStep(natDNode, file, previous)
+	local nodePred, nodeHyp, nodePred1, nodePred2, stepDed = nil
 	local currentIntro = 0
-
-	if currentRule == nil then currentRule = "" end
-
-	local rule = currentRule
 
 	if natDNode ~= nil then
 		for _, edge in ipairs(natDNode:getEdgesOut()) do
 			-- Nó de implicação ou atômico que apresenta uma dedução
 			if edge:getLabel() == lblEdgeDeduction..natDNode:getInformation("nextDED") then
 				stepDed = edge:getDestino()
-				rule = edge:getInformation("rule")
 
 				-- Altera a dedução caso haja uma outra dedução diferente partindo deste nó.
 				if natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1)) ~= nil then
 					natDNode:setInformation("nextDED", natDNode:getInformation("nextDED") + 1)
 				end
-
-				if rule:sub(11, 15) == "intro" then
-					currentIntro = string.match (rule, "%d+")
-					rule = "Intro"..currentIntro
-					currentIntro = tonumber(currentIntro)
-				else -- Elim
-					currentElim = string.match (rule, "%d+")
-					rule = "Elim"..currentElim
-				end
-				break
 
 			-- Na →-Intro, há um predicado apenas (o outro é uma hipótese descartada).
 			elseif edge:getLabel() == lblEdgePredicate then
@@ -120,35 +114,94 @@ local function printProofStep(natDNode, file, currentRule)
 			end
 		end
 
+		-- Verifica nós repetidos
+		if natDNode:getInformation("Printed") == nil then
+			natDNode:setInformation("Printed", 0)
+		end
+
 		-- Nó de predicado lógico que não tem ramificações, descartado. Em azul.
 		if (natDNode:getInformation("discharged") == true and currentIntro >= findInDischargeable(natDNode)) then
-			file:write(printFinalNode(natDNode).." [color=blue];\n")
+			file:write("\""..printFinalNode(natDNode).."\" [color=blue];\n")
 
 		-- Nó de predicado lógico que não ramifica mas não foi descartado. Em vermelho.
 		elseif natDNode:getInformation("Invalid") == true and (natDNode:getEdgeOut(lblEdgeDeduction..(natDNode:getInformation("nextDED") + 1) == nil) or natDNode:getEdgeOut(lblEdgeDeduction.."1") == nil) then
-			file:write("\""..printFormula(natDNode).."\" [color=red];")
+			file:write("\""..printFormula(natDNode).."\" [color=red];\n")
 
 		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
 		elseif stepDed ~= nil then
-			file:write("\""..printFormula(natDNode).."\" -> \""..rule.."\";\n")
-
-			printProofStep(stepDed, file, rule)
+			printProofStep(stepDed, file, natDNode)
 
 		-- É um nó de →-Intro
 		-- Arestas indicando descarte de hipóteses estão em verde.
 		elseif nodePred ~= nil and nodeHyp ~= nil then
-			file:write("\""..rule.."\" -> \""..printFormula(nodeHyp).."\" [color=green];\n")
-			file:write("\""..rule.."\" -> \""..printFormula(nodePred).."\";\n")
+			local hypPrinted = nodeHyp:getInformation("Printed")
+			local predPrinted = nodePred:getInformation("Printed")
+			local prevPrinted = previous:getInformation("Printed")
+			local hypFormula = printFormula(nodeHyp)
+			local predFormula = printFormula(nodePred)
+			local prevFormula = printFormula(previous)
 
-			printProofStep(nodePred, file, rule)
+			if hypFormula == nil then
+				hypFormula = ""
+			end
+
+			if hypPrinted ~= nil and hypPrinted ~= 0 then
+				hypFormula = hypFormula.."  "..hypPrinted
+			end
+
+			if predPrinted ~= nil and predPrinted ~= 0 then
+				predFormula = predFormula.."  "..predPrinted
+			end
+
+			if prevPrinted ~= nil and prevPrinted ~= 0 then
+				prevFormula = prevFormula.."  "..prevPrinted
+			end
+
+			file:write("\""..hypFormula.."\" -> \""..prevFormula.."\" [color=green];\n")
+			file:write("\""..prevFormula.."\" -> \""..predFormula.."\";\n")
+
+			printProofStep(nodePred, file, previous)
 
 		-- É um nó de →-Elim
 		elseif nodePred1 ~= nil and nodePred2 ~= nil then
-			file:write("\""..rule.."\" -> \""..printFormula(nodePred1).."\";\n")
-			file:write("\""..rule.."\" -> \""..printFormula(nodePred2).."\";\n")
+			local pred1Printed = nodePred1:getInformation("Printed")
+			local pred2Printed = nodePred2:getInformation("Printed")
+			local prevPrinted = previous:getInformation("Printed")
+			local pred1Formula = printFormula(nodePred1)
+			local pred2Formula = printFormula(nodePred2)
+			local prevFormula = printFormula(previous)
 
-			printProofStep(nodePred1, file, rule)
-			printProofStep(nodePred2, file, rule)
+			if pred1Printed ~= nil then
+				nodePred1:setInformation("Printed", pred1Printed + 1)
+			else
+				nodePred1:setInformation("Printed", 0)
+			end
+			if pred2Printed ~= nil then
+				nodePred2:setInformation("Printed", pred2Printed + 1)
+			else
+				nodePred2:setInformation("Printed", 0)
+			end
+
+			pred1Printed = nodePred1:getInformation("Printed")
+			pred2Printed = nodePred2:getInformation("Printed")
+
+			if pred1Printed ~= 0 then
+				pred1Formula = pred1Formula.."  "..pred1Printed
+			end
+
+			if pred2Printed ~= 0 then
+				pred2Formula = pred2Formula.."  "..pred2Printed
+			end
+
+			if prevPrinted ~= 0 then
+				prevFormula = prevFormula.."  "..prevPrinted
+			end
+
+			file:write("\""..prevFormula.."\" -> \""..pred1Formula.."\";\n")
+			file:write("\""..prevFormula.."\" -> \""..pred2Formula.."\";\n")
+
+			printProofStep(nodePred1, file, previous)
+			printProofStep(nodePred2, file, previous)
 
 		end
 	end
@@ -173,7 +226,7 @@ function PrintDotModule.printProofDot(agraph, nameSufix)
 
 		file:write("digraph prooftreeDot"..nameSufix.." {\n")
 
-		printProofStep(step, file)
+		printProofStep(step, file, nil)
 
 		file:write("}\n")
 		file:close()

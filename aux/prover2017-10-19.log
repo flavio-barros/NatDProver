@@ -1,0 +1,10 @@
+Thu Oct 19 15:36:29 2017 WARN Logger: changing loglevel from DEBUG to INFO
+Thu Oct 19 15:36:29 2017 WARN Logger: changing loglevel from DEBUG to DEBUG
+Thu Oct 19 15:36:31 2017 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp ((A1) imp (A3)))
+Thu Oct 19 15:36:37 2017 INFO applyImplyIntroRule - imp5 was expanded
+Thu Oct 19 15:36:37 2017 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Thu Oct 19 15:36:37 2017 INFO applyImplyIntroRule - imp4 was expanded
+Thu Oct 19 15:36:37 2017 INFO applyImplyIntroRule - imp3 was expanded
+Thu Oct 19 15:36:37 2017 INFO applyImplyElimRule - A3 was expanded
+Thu Oct 19 15:36:37 2017 INFO applyImplyElimRule - A2 was expanded
+Thu Oct 19 15:36:37 2017 INFO applyImplyElimRule - imp1 was expanded

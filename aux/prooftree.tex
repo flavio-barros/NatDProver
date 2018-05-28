@@ -1,0 +1,192 @@
+\documentclass[landscape]{article}
+
+\usepackage{color}
+\usepackage{proof}
+\usepackage{qtree}
+
+\begin{document}
+$$
+\infer[\to \mbox{intro}_{1}]
+{(( A1  \to  A2 ) \to (( A1  \to ( A2  \to  A3 )) \to (( A2  \to ( A3  \to  A4 )) \to (( A3  \to ( A4  \to  A5 )) \to (( A4  \to ( A5  \to  A6 )) \to (( A5  \to ( A6  \to  A7 )) \to ( A1  \to  A7 )))))))}
+{\infer[\to \mbox{intro}_{2}]
+{(( A1  \to ( A2  \to  A3 )) \to (( A2  \to ( A3  \to  A4 )) \to (( A3  \to ( A4  \to  A5 )) \to (( A4  \to ( A5  \to  A6 )) \to (( A5  \to ( A6  \to  A7 )) \to ( A1  \to  A7 ))))))}
+{\infer[\to \mbox{intro}_{3}]
+{(( A2  \to ( A3  \to  A4 )) \to (( A3  \to ( A4  \to  A5 )) \to (( A4  \to ( A5  \to  A6 )) \to (( A5  \to ( A6  \to  A7 )) \to ( A1  \to  A7 )))))}
+{\infer[\to \mbox{intro}_{4}]
+{(( A3  \to ( A4  \to  A5 )) \to (( A4  \to ( A5  \to  A6 )) \to (( A5  \to ( A6  \to  A7 )) \to ( A1  \to  A7 ))))}
+{\infer[\to \mbox{intro}_{5}]
+{(( A4  \to ( A5  \to  A6 )) \to (( A5  \to ( A6  \to  A7 )) \to ( A1  \to  A7 )))}
+{\infer[\to \mbox{intro}_{6}]
+{(( A5  \to ( A6  \to  A7 )) \to ( A1  \to  A7 ))}
+{\infer[\to \mbox{intro}_{7}]
+{( A1  \to  A7 )}
+{\infer[\to \mbox{elim}_{1}]
+{ A7 }
+{\infer[\to \mbox{elim}_{2}]
+{ A6 }
+{\infer[\to \mbox{elim}_{4}]
+{ A5 }
+{\infer[\to \mbox{elim}_{6}]
+{ A4 }
+{\infer[\to \mbox{elim}_{8}]
+{ A3 }
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+\infer[\to \mbox{elim}_{11}]
+{( A2  \to  A3 )}
+{{[ A1 ]_{7}}
+&
+{[( A1  \to ( A2  \to  A3 ))]_{2}}
+}
+}
+&
+\infer[\to \mbox{elim}_{9}]
+{( A3  \to  A4 )}
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+{[( A2  \to ( A3  \to  A4 ))]_{3}}
+}
+}
+&
+\infer[\to \mbox{elim}_{7}]
+{( A4  \to  A5 )}
+{\infer[\to \mbox{elim}_{8}]
+{ A3 }
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+\infer[\to \mbox{elim}_{11}]
+{( A2  \to  A3 )}
+{{[ A1 ]_{7}}
+&
+{[( A1  \to ( A2  \to  A3 ))]_{2}}
+}
+}
+&
+{[( A3  \to ( A4  \to  A5 ))]_{4}}
+}
+}
+&
+\infer[\to \mbox{elim}_{5}]
+{( A5  \to  A6 )}
+{\infer[\to \mbox{elim}_{6}]
+{ A4 }
+{\infer[\to \mbox{elim}_{8}]
+{ A3 }
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+\infer[\to \mbox{elim}_{11}]
+{( A2  \to  A3 )}
+{{[ A1 ]_{7}}
+&
+{[( A1  \to ( A2  \to  A3 ))]_{2}}
+}
+}
+&
+\infer[\to \mbox{elim}_{9}]
+{( A3  \to  A4 )}
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+{[( A2  \to ( A3  \to  A4 ))]_{3}}
+}
+}
+&
+{[( A4  \to ( A5  \to  A6 ))]_{5}}
+}
+}
+&
+\infer[\to \mbox{elim}_{3}]
+{( A6  \to  A7 )}
+{\infer[\to \mbox{elim}_{4}]
+{ A5 }
+{\infer[\to \mbox{elim}_{6}]
+{ A4 }
+{\infer[\to \mbox{elim}_{8}]
+{ A3 }
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+\infer[\to \mbox{elim}_{11}]
+{( A2  \to  A3 )}
+{{[ A1 ]_{7}}
+&
+{[( A1  \to ( A2  \to  A3 ))]_{2}}
+}
+}
+&
+\infer[\to \mbox{elim}_{9}]
+{( A3  \to  A4 )}
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+{[( A2  \to ( A3  \to  A4 ))]_{3}}
+}
+}
+&
+\infer[\to \mbox{elim}_{7}]
+{( A4  \to  A5 )}
+{\infer[\to \mbox{elim}_{8}]
+{ A3 }
+{\infer[\to \mbox{elim}_{10}]
+{ A2 }
+{{[ A1 ]_{7}}
+&
+{[( A1  \to  A2 )]_{1}}
+}
+&
+\infer[\to \mbox{elim}_{11}]
+{( A2  \to  A3 )}
+{{[ A1 ]_{7}}
+&
+{[( A1  \to ( A2  \to  A3 ))]_{2}}
+}
+}
+&
+{[( A3  \to ( A4  \to  A5 ))]_{4}}
+}
+}
+&
+{[( A5  \to ( A6  \to  A7 ))]_{6}}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+$$
+\end{document}

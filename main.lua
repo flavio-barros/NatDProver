@@ -1,7 +1,8 @@
 ------------------------------------------------------------------------------
 --  Main Module
 --
---  This module defines ...
+--  Este módulo é o módulo principal da aplicação e nele se encontra a
+-- interface com Löve.
 --
 --  @author: Vitor, Marcela, Hermann, Jefferson, Bernardo
 --
@@ -253,7 +254,9 @@ local function getNodeClicked()
    return nil
 end
 
+------------------------------------------------------------------------------
 -- Event actions functions
+------------------------------------------------------------------------------
 
 local function proofStarted()
    local ret = false
@@ -293,12 +296,10 @@ end
 
 local function runInput()
    local parsed_formula = parse_input(input_formula)
-   print(parsed_formula)
    t_formula = convert_formula_totable(parsed_formula)
    
    local t_mimp_formula = implicational(t_formula)
    logger:info("inputFormula - alpha: "..convert_formula_tostring(t_mimp_formula))
-   print(convert_formula_tostring(t_mimp_formula))
    NatDGraph = LogicModule.createGraphFromTable(t_mimp_formula)
    prepareGraphToDraw(NatDGraph)
 end
@@ -310,6 +311,7 @@ local function inputCommand()
    input_command = ""
 end
 
+-- Função que roda a entrada do usuário.
 local function runCommand()
    input_command = input_command:gsub("%(", "%(\"")
    input_command = input_command:gsub("%)", "\"%)")
@@ -322,6 +324,7 @@ local function runCommand()
    inputCommand()
 end
 
+-- Função que imprime a prova atual em Latex.
 local function printProof()
     if proofStarted() then
         ret = PrintModule.printProof(NatDGraph, "")
@@ -332,6 +335,7 @@ local function printProof()
     end
 end
 
+-- Função que imprime a prova atual em Latex.
 local function printProofDot()
     if proofStarted() then
         ret = PrintDotModule.printProofDot(NatDGraph, "")
@@ -360,7 +364,9 @@ local function implyIntroStep()
     end
 end
 
+------------------------------------------------------------------------------
 -- Events functions
+------------------------------------------------------------------------------
 
 local function showInputTextEvent()
     -- Mudança necessária para Löve 0.10. Sem ela, o fundo ficava preto
@@ -382,7 +388,6 @@ local function showInputTextEvent()
         i = i + 1
     end
 
-    --dofile("Test/data")
     assert(love.filesystem.load("Test/data.lua"))()
 end
 
@@ -601,7 +606,9 @@ local function dragNodeOrScreenOrSelectFocusEvent()
    end
 end
 
+------------------------------------------------------------------------------
 -- Public functions: Love events
+------------------------------------------------------------------------------
 
 function love.keypressed(key)
     if key == "a" and love.keyboard.isDown("lctrl") then

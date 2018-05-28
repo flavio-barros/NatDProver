@@ -18,7 +18,7 @@ logger:setLevel(logging.INFO)
 LogicModule = {}
 
 -- Lista dos ramos ativos no momento
-local openBranchesList = {}
+openBranchesList = {}
 -- O grafo em si (global ao módulo)
 local graph = nil
 -- Variável para indexação de descartes de hipótese
@@ -652,7 +652,7 @@ function LogicModule.nodeEquals(node1, node2)
 				node2Right = edge:getDestino()
 			end
 		end
-
+		
 		--print(node1:getLabel())
 		--print(node2:getLabel())
 

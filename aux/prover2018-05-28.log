@@ -1,0 +1,266 @@
+Mon May 28 13:25:29 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:25:29 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:25:35 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:25:36 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:25:36 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:25:36 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:25:36 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:25:36 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:25:36 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:25:36 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:25:36 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:25:36 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:25:36 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:32:55 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:32:55 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:33:01 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:33:02 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:33:02 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:33:02 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:33:02 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:33:02 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:33:02 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:33:02 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:33:02 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:33:02 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:33:02 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:34:15 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:34:15 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:34:19 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:34:19 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:34:19 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:34:19 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:34:19 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:34:19 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:34:19 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:34:19 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:34:19 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:34:19 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:34:19 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:41:06 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:41:06 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:41:09 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:41:09 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:41:09 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:41:09 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:41:09 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:41:09 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:41:09 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:41:09 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:41:09 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:41:09 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:41:09 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:44:52 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:44:52 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:44:55 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:44:55 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:44:55 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:44:55 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:44:55 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:44:55 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:44:55 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:44:55 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:44:55 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:44:55 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:44:55 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:45:32 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:45:32 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:45:35 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:45:35 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:45:35 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:45:35 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:45:35 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:45:35 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:45:35 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:45:35 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:45:35 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:45:35 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:45:35 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:47:22 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:47:23 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:47:23 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:47:23 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:47:23 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:47:23 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:47:23 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:47:23 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:47:23 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:47:23 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:47:23 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:48:15 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:48:15 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:48:19 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:48:19 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:48:19 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:48:19 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:48:19 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:48:19 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:48:19 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:48:19 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:48:19 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:48:19 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:48:19 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:52:55 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:52:55 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:52:57 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:52:58 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:52:58 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:52:58 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:52:58 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:52:58 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:52:58 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:52:58 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:52:58 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:52:58 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:52:58 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 13:53:47 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 13:53:47 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 13:53:49 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 13:53:49 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 13:53:49 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 13:53:49 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 13:53:49 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 13:53:49 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 13:53:49 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 13:53:49 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 13:53:49 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 13:53:49 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 13:53:49 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:01:23 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 14:01:24 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 14:01:26 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 14:01:27 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 14:01:27 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:01:27 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 14:01:27 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 14:01:27 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 14:01:27 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:01:27 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:01:27 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:01:27 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:01:27 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:03:24 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 14:03:24 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 14:03:28 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 14:03:29 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 14:03:29 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:03:29 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 14:03:29 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 14:03:29 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 14:03:29 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:03:29 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:03:29 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:03:29 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:03:29 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:05:55 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 14:05:55 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 14:05:58 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 14:05:59 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 14:05:59 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:05:59 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 14:05:59 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 14:05:59 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 14:05:59 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:05:59 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:05:59 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:05:59 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:05:59 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:07:34 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 14:07:34 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 14:07:35 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp ((A1) imp (A4))))
+Mon May 28 14:07:36 2018 INFO applyImplyIntroRule - imp8 was expanded
+Mon May 28 14:07:36 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:07:36 2018 INFO applyImplyIntroRule - imp7 was expanded
+Mon May 28 14:07:36 2018 INFO applyImplyIntroRule - imp6 was expanded
+Mon May 28 14:07:36 2018 INFO applyImplyIntroRule - imp5 was expanded
+Mon May 28 14:07:36 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:07:36 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:07:36 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:07:36 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:07:36 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:09:16 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 14:09:16 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 14:09:18 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp (((A3) imp ((A4) imp (A5))) imp (((A4) imp ((A5) imp (A6))) imp (((A5) imp ((A6) imp (A7))) imp ((A1) imp (A7)))))))
+Mon May 28 14:09:19 2018 INFO applyImplyIntroRule - imp17 was expanded
+Mon May 28 14:09:19 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:09:19 2018 INFO applyImplyIntroRule - imp16 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyIntroRule - imp15 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyIntroRule - imp14 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyIntroRule - imp13 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyIntroRule - imp12 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyIntroRule - imp11 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - A7 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - A6 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - imp9 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - A5 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - imp7 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - imp5 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:09:19 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:27:46 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp (((A3) imp ((A4) imp (A5))) imp (((A4) imp ((A5) imp (A6))) imp (((A5) imp ((A6) imp (A7))) imp ((A1) imp (A7)))))))
+Mon May 28 14:27:46 2018 INFO applyImplyIntroRule - imp17 was expanded
+Mon May 28 14:27:46 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:27:46 2018 INFO applyImplyIntroRule - imp16 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyIntroRule - imp15 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyIntroRule - imp14 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyIntroRule - imp13 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyIntroRule - imp12 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyIntroRule - imp11 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - A7 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - A6 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - imp9 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - A5 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - imp7 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - imp5 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:27:46 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:28:00 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 14:28:00 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 14:28:03 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp (((A3) imp ((A4) imp (A5))) imp (((A4) imp ((A5) imp (A6))) imp (((A5) imp ((A6) imp (A7))) imp ((A1) imp (A7)))))))
+Mon May 28 14:28:04 2018 INFO applyImplyIntroRule - imp17 was expanded
+Mon May 28 14:28:04 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:28:04 2018 INFO applyImplyIntroRule - imp16 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyIntroRule - imp15 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyIntroRule - imp14 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyIntroRule - imp13 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyIntroRule - imp12 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyIntroRule - imp11 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - A7 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - A6 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - imp9 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - A5 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - imp7 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - imp5 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:28:04 2018 INFO applyImplyElimRule - imp1 was expanded
+Mon May 28 14:30:47 2018 WARN Logger: changing loglevel from DEBUG to INFO
+Mon May 28 14:30:47 2018 WARN Logger: changing loglevel from DEBUG to DEBUG
+Mon May 28 14:30:50 2018 INFO inputFormula - alpha: ((A1) imp (A2)) imp (((A1) imp ((A2) imp (A3))) imp (((A2) imp ((A3) imp (A4))) imp (((A3) imp ((A4) imp (A5))) imp (((A4) imp ((A5) imp (A6))) imp (((A5) imp ((A6) imp (A7))) imp ((A1) imp (A7)))))))
+Mon May 28 14:30:50 2018 INFO applyImplyIntroRule - imp17 was expanded
+Mon May 28 14:30:50 2018 INFO WARNING - Attempted to remove a node from openBranchesList which was not in it.
+Mon May 28 14:30:50 2018 INFO applyImplyIntroRule - imp16 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyIntroRule - imp15 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyIntroRule - imp14 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyIntroRule - imp13 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyIntroRule - imp12 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyIntroRule - imp11 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - A7 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - A6 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - imp9 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - A5 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - imp7 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - A4 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - imp5 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - A3 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - imp3 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - A2 was expanded
+Mon May 28 14:30:50 2018 INFO applyImplyElimRule - imp1 was expanded
