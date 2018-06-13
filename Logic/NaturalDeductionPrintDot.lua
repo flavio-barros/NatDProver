@@ -13,6 +13,9 @@ require "Logic/NaturalDeductionLogic"
 
 PrintDotModule = {}
 
+-- TODO passar as fórmulas para os labels e identificar os nós apenas com um índice
+-- TODO guardar esse índice geral em cada nó? Uma lista de índices?
+
 -- Funções Locais
 -- Função auxiliar que procura por um nó do grafo na lista de hipóteses descartadas.
 -- @param formulaNode Nó a ser buscado.
@@ -134,20 +137,10 @@ local function printProofStep(natDNode, file, previous)
 		-- É um nó de →-Intro
 		-- Arestas indicando descarte de hipóteses estão em verde.
 		elseif nodePred ~= nil and nodeHyp ~= nil then
-			local hypPrinted = nodeHyp:getInformation("Printed")
 			local predPrinted = nodePred:getInformation("Printed")
 			local prevPrinted = previous:getInformation("Printed")
-			local hypFormula = printFormula(nodeHyp)
 			local predFormula = printFormula(nodePred)
 			local prevFormula = printFormula(previous)
-
-			if hypFormula == nil then
-				hypFormula = ""
-			end
-
-			if hypPrinted ~= nil and hypPrinted ~= 0 then
-				hypFormula = hypFormula.."  "..hypPrinted
-			end
 
 			if predPrinted ~= nil and predPrinted ~= 0 then
 				predFormula = predFormula.."  "..predPrinted
@@ -157,8 +150,7 @@ local function printProofStep(natDNode, file, previous)
 				prevFormula = prevFormula.."  "..prevPrinted
 			end
 
-			file:write("\""..hypFormula.."\" -> \""..prevFormula.."\" [color=green];\n")
-			file:write("\""..prevFormula.."\" -> \""..predFormula.."\";\n")
+			file:write("\""..predFormula.."\" -> \""..prevFormula.."\";\n")
 
 			printProofStep(nodePred, file, previous)
 
@@ -170,6 +162,8 @@ local function printProofStep(natDNode, file, previous)
 			local pred1Formula = printFormula(nodePred1)
 			local pred2Formula = printFormula(nodePred2)
 			local prevFormula = printFormula(previous)
+			local nodeDisc1 = nil
+			local nodeDisc2 = nil
 
 			if pred1Printed ~= nil then
 				nodePred1:setInformation("Printed", pred1Printed + 1)
@@ -197,8 +191,65 @@ local function printProofStep(natDNode, file, previous)
 				prevFormula = prevFormula.."  "..prevPrinted
 			end
 
-			file:write("\""..prevFormula.."\" -> \""..pred1Formula.."\";\n")
-			file:write("\""..prevFormula.."\" -> \""..pred2Formula.."\";\n")
+			file:write("\""..pred1Formula.."\" -> \""..prevFormula.."\";\n")
+			file:write("\""..pred2Formula.."\" -> \""..prevFormula.."\";\n")
+
+			-- Criando arestas de descarte de hipótese
+			for _, edge in ipairs(nodePred1:getEdgesIn()) do
+				if edge:getLabel() == lblEdgeHypothesis and LogicModule.nodeEquals(edge:getDestino(), nodePred1) then
+					nodeDisc1 = edge:getOrigem():getEdgeIn(lblEdgeDeduction..1):getOrigem()
+				end
+			end
+
+			if nodeDisc1 ~= nil then
+				local disc1Printed = nodeDisc1:getInformation("Printed")
+				local disc1Formula = printFormula(nodeDisc1)
+
+				if disc1Printed == nil then
+					nodeDisc1:setInformation("Printed", 1)
+				end
+
+				disc1Printed = nodeDisc1:getInformation("Printed")
+
+				if disc1Printed ~= nil and disc1Printed ~= 0 and disc1Formula ~= "" then
+					for i = 1, disc1Printed do
+						local disc1FormOrig = disc1Formula
+						disc1Formula = disc1Formula.."  "..i
+						file:write("\""..pred1Formula.."\" -> \""..disc1Formula.."\" [color=green];\n")
+						disc1Formula = disc1FormOrig
+					end
+				else
+					file:write("\""..pred1Formula.."\" -> \""..disc1Formula.."\" [color=green];\n")
+				end
+			end
+
+			for _, edge in ipairs(nodePred2:getEdgesIn()) do
+				if edge:getLabel() == lblEdgeHypothesis and LogicModule.nodeEquals(edge:getDestino(), nodePred2) then
+					nodeDisc2 = edge:getOrigem():getEdgeIn(lblEdgeDeduction..1):getOrigem()
+				end
+			end
+
+			if nodeDisc2 ~= nil then
+				local disc2Printed = nodeDisc2:getInformation("Printed")
+				local disc2Formula = printFormula(nodeDisc2)
+
+				if disc2Printed == nil then
+					nodeDisc2:setInformation("Printed", 1)
+				end
+
+				disc2Printed = nodeDisc2:getInformation("Printed")
+
+				if disc2Printed ~= nil and disc2Printed ~= 0 and disc2Formula ~= "" then
+					for i = 1, disc2Printed do
+						local disc2FormOrig = disc2Formula
+						disc2Formula = disc2Formula.."  "..i
+						file:write("\""..pred2Formula.."\" -> \""..disc2Formula.."\" [color=green];\n")
+						disc2Formula = disc2FormOrig
+					end
+				else
+					file:write("\""..pred2Formula.."\" -> \""..disc2Formula.."\" [color=green];\n")
+				end
+			end
 
 			printProofStep(nodePred1, file, previous)
 			printProofStep(nodePred2, file, previous)
