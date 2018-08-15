@@ -13,8 +13,15 @@ require "Logic/NaturalDeductionLogic"
 
 PrintDotModule = {}
 
--- TODO passar as fórmulas para os labels e identificar os nós apenas com um índice
--- TODO guardar esse índice geral em cada nó? Uma lista de índices?
+-- TODO guardar o pai correto!!!! Especialmente importante na →-elim
+-- tanto na →-elim quanto na →-intro usamos as fórmulas inteiras para os pais
+-- ver como lidar direito!!!
+-- press F to pay respects
+-- Principais problemas estão nas arestas de descarte de hipótese
+-- TODO propagação de descartes desnecessário
+
+-- Variável local para indicar qual o nó atual a ser impresso
+local currentNode = 0
 
 -- Funções Locais
 -- Função auxiliar que procura por um nó do grafo na lista de hipóteses descartadas.
@@ -117,11 +124,6 @@ local function printProofStep(natDNode, file, previous)
 			end
 		end
 
-		-- Verifica nós repetidos
-		if natDNode:getInformation("Printed") == nil then
-			natDNode:setInformation("Printed", 0)
-		end
-
 		-- Nó de predicado lógico que não tem ramificações, descartado. Em azul.
 		if (natDNode:getInformation("discharged") == true and currentIntro >= findInDischargeable(natDNode)) then
 			file:write("\""..printFinalNode(natDNode).."\" [color=blue];\n")
@@ -132,128 +134,55 @@ local function printProofStep(natDNode, file, previous)
 
 		-- Caso tenha um nó dedutivo como filho, precisamos criar a regra de inferência
 		elseif stepDed ~= nil then
-			printProofStep(stepDed, file, natDNode)
+			if currentNode == 1 then
+				file:write("\""..currentNode.."\" [label=\""..printFormula(natDNode).."\"];\n")
+			end
+			printProofStep(stepDed, file, currentNode)
 
 		-- É um nó de →-Intro
 		-- Arestas indicando descarte de hipóteses estão em verde.
 		elseif nodePred ~= nil and nodeHyp ~= nil then
-			local predPrinted = nodePred:getInformation("Printed")
-			local prevPrinted = previous:getInformation("Printed")
-			local predFormula = printFormula(nodePred)
-			local prevFormula = printFormula(previous)
-
-			if predPrinted ~= nil and predPrinted ~= 0 then
-				predFormula = predFormula.."  "..predPrinted
+			currentNode = currentNode + 1
+			file:write("\""..currentNode.."\" [label=\""..printFormula(nodePred).."\"];\n")
+			file:write("\""..currentNode.."\" -> \""..previous.."\";\n")
+			if nodeHyp:getInformation("DischargeIndexes") == nil then
+				nodeHyp:setInformation("DischargeIndexes", {previous})
+			else
+				nodeHyp:setInformation("DischargeIndexes", table.insert(nodeHyp:getInformation("DischargeIndexes"), previous))
 			end
-
-			if prevPrinted ~= nil and prevPrinted ~= 0 then
-				prevFormula = prevFormula.."  "..prevPrinted
-			end
-
-			file:write("\""..predFormula.."\" -> \""..prevFormula.."\";\n")
-
-			printProofStep(nodePred, file, previous)
+			printProofStep(nodePred, file, currentNode)
 
 		-- É um nó de →-Elim
 		elseif nodePred1 ~= nil and nodePred2 ~= nil then
-			local pred1Printed = nodePred1:getInformation("Printed")
-			local pred2Printed = nodePred2:getInformation("Printed")
-			local prevPrinted = previous:getInformation("Printed")
-			local pred1Formula = printFormula(nodePred1)
-			local pred2Formula = printFormula(nodePred2)
-			local prevFormula = printFormula(previous)
-			local nodeDisc1 = nil
-			local nodeDisc2 = nil
-
-			if pred1Printed ~= nil then
-				nodePred1:setInformation("Printed", pred1Printed + 1)
-			else
-				nodePred1:setInformation("Printed", 0)
-			end
-			if pred2Printed ~= nil then
-				nodePred2:setInformation("Printed", pred2Printed + 1)
-			else
-				nodePred2:setInformation("Printed", 0)
-			end
-
-			pred1Printed = nodePred1:getInformation("Printed")
-			pred2Printed = nodePred2:getInformation("Printed")
-
-			if pred1Printed ~= 0 then
-				pred1Formula = pred1Formula.."  "..pred1Printed
-			end
-
-			if pred2Printed ~= 0 then
-				pred2Formula = pred2Formula.."  "..pred2Printed
-			end
-
-			if prevPrinted ~= 0 then
-				prevFormula = prevFormula.."  "..prevPrinted
-			end
-
-			file:write("\""..pred1Formula.."\" -> \""..prevFormula.."\";\n")
-			file:write("\""..pred2Formula.."\" -> \""..prevFormula.."\";\n")
-
+			currentNode = currentNode + 1
+			file:write("\""..currentNode.."\" [label=\""..printFormula(nodePred1).."\"];\n")
+			file:write("\""..currentNode.."\" -> \""..previous.."\";\n")
 			-- Criando arestas de descarte de hipótese
-			for _, edge in ipairs(nodePred1:getEdgesIn()) do
-				if edge:getLabel() == lblEdgeHypothesis and LogicModule.nodeEquals(edge:getDestino(), nodePred1) then
-					nodeDisc1 = edge:getOrigem():getEdgeIn(lblEdgeDeduction..1):getOrigem()
-				end
-			end
-
-			if nodeDisc1 ~= nil then
-				local disc1Printed = nodeDisc1:getInformation("Printed")
-				local disc1Formula = printFormula(nodeDisc1)
-
-				if disc1Printed == nil then
-					nodeDisc1:setInformation("Printed", 1)
-				end
-
-				disc1Printed = nodeDisc1:getInformation("Printed")
-
-				if disc1Printed ~= nil and disc1Printed ~= 0 and disc1Formula ~= "" then
-					for i = 1, disc1Printed do
-						local disc1FormOrig = disc1Formula
-						disc1Formula = disc1Formula.."  "..i
-						file:write("\""..pred1Formula.."\" -> \""..disc1Formula.."\" [color=green];\n")
-						disc1Formula = disc1FormOrig
+			local j = 1
+			if nodePred1:getInformation("DischargeIndexes") ~= nil then
+				for _, edge in ipairs(nodePred1:getEdgesIn()) do
+					if edge:getLabel() == lblEdgeHypothesis then
+						file:write("\""..currentNode.."\" -> \""..nodePred1:getInformation("DischargeIndexes")[j].."\" [color=green];\n")
+						j = j + 1
 					end
-				else
-					file:write("\""..pred1Formula.."\" -> \""..disc1Formula.."\" [color=green];\n")
 				end
 			end
+			printProofStep(nodePred1, file, currentNode)
 
-			for _, edge in ipairs(nodePred2:getEdgesIn()) do
-				if edge:getLabel() == lblEdgeHypothesis and LogicModule.nodeEquals(edge:getDestino(), nodePred2) then
-					nodeDisc2 = edge:getOrigem():getEdgeIn(lblEdgeDeduction..1):getOrigem()
-				end
-			end
-
-			if nodeDisc2 ~= nil then
-				local disc2Printed = nodeDisc2:getInformation("Printed")
-				local disc2Formula = printFormula(nodeDisc2)
-
-				if disc2Printed == nil then
-					nodeDisc2:setInformation("Printed", 1)
-				end
-
-				disc2Printed = nodeDisc2:getInformation("Printed")
-
-				if disc2Printed ~= nil and disc2Printed ~= 0 and disc2Formula ~= "" then
-					for i = 1, disc2Printed do
-						local disc2FormOrig = disc2Formula
-						disc2Formula = disc2Formula.."  "..i
-						file:write("\""..pred2Formula.."\" -> \""..disc2Formula.."\" [color=green];\n")
-						disc2Formula = disc2FormOrig
+			currentNode = currentNode + 1
+			file:write("\""..currentNode.."\" [label=\""..printFormula(nodePred2).."\"];\n")
+			file:write("\""..currentNode.."\" -> \""..previous.."\";\n")
+			-- Criando arestas de descarte de hipótese
+			local j = 1
+			if nodePred2:getInformation("DischargeIndexes") ~= nil then
+				for _, edge in ipairs(nodePred2:getEdgesIn()) do
+					if edge:getLabel() == lblEdgeHypothesis then
+						file:write("\""..currentNode.."\" -> \""..nodePred2:getInformation("DischargeIndexes")[j].."\" [color=green];\n")
+						j = j + 1
 					end
-				else
-					file:write("\""..pred2Formula.."\" -> \""..disc2Formula.."\" [color=green];\n")
 				end
 			end
-
-			printProofStep(nodePred1, file, previous)
-			printProofStep(nodePred2, file, previous)
-
+			printProofStep(nodePred2, file, currentNode)
 		end
 	end
 end
@@ -277,13 +206,16 @@ function PrintDotModule.printProofDot(agraph, nameSufix)
 
 		file:write("digraph prooftreeDot"..nameSufix.." {\n")
 
-		printProofStep(step, file, nil)
+		currentNode = currentNode + 1
+		printProofStep(step, file, currentNode)
 
 		file:write("}\n")
 		file:close()
 
 		ret = true
 	end
+
+	currentNode = 0
 
 	return ret
 end
