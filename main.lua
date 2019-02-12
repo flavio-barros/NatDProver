@@ -92,7 +92,7 @@ local function applyForces(graph)
       nodes[i]:setInformation("m",0.5)
    end
 
-   repeat               
+   repeat
       total_kinetic_energy = 0
       for i=1, #nodes do
 
@@ -134,7 +134,7 @@ local function applyForces(graph)
          end
          nodes[i]:setInformation("Vx", (nodes[i]:getInformation("Vx")+(nodes[i]:getInformation("Fx")*0.85)))
          nodes[i]:setInformation("Vy", (nodes[i]:getInformation("Vy")+(nodes[i]:getInformation("Fy")*0.85)))
-         
+
          nodes[i]:setPositionX(nodes[i]:getPositionX()+nodes[i]:getInformation("Vx"))
          nodes[i]:setPositionY(nodes[i]:getPositionY()+nodes[i]:getInformation("Vy"))
 
@@ -152,8 +152,8 @@ local function prepareGraphToDraw(graph)
    posY = yBegin
 
    if nodes ~= nil then
-      for  i = 1, #nodes do             
-         if nodes[i]:getPosition() == nil then -- só atualiza os nós que nao tem posicao.                       
+      for  i = 1, #nodes do
+         if nodes[i]:getPosition() == nil then -- só atualiza os nós que nao tem posicao.
             nodes[i]:setPosition(posX,posY)
             if i % 2 == 0 then
                posX = posX + 10
@@ -170,7 +170,7 @@ end
 --- Receive a graph and draws it on the screen.
 local function drawGraphEvent(graph)
    local i = 1
-   
+
    assert( getmetatable(graph) == Graph_Metatable , "drawGraphEvent expects a graph.")
 
    local nodes = graph:getNodes()
@@ -186,20 +186,20 @@ local function drawGraphEvent(graph)
            if node:getInformation("isSelected") == true then
               love.graphics.setColor(255, 255, 0) -- Yellow circle
            end
-         else        
-           if node:getInformation("isProved") == nil then 
+         else
+           if node:getInformation("isProved") == nil then
               love.graphics.setColor(204, 204, 204) -- Gray circle
-           elseif node:getInformation("Invalid") == true then 
+           elseif node:getInformation("Invalid") == true then
               love.graphics.setColor(255, 0, 0) -- Red circle
-           elseif node:getInformation("isProved") == true then 
-              love.graphics.setColor(0, 0, 255) -- Blue circle           
+           elseif node:getInformation("isProved") == true then
+              love.graphics.setColor(0, 0, 255) -- Blue circle
            end
-           node:setInformation("isSelected", false)           
+           node:setInformation("isSelected", false)
          end
 
-         if node:getInformation("found") == true then 
+         if node:getInformation("found") == true then
             love.graphics.setColor(255, 255, 0) -- Yellow circle
-         end         
+         end
 
          if node:getPositionX() ~= nil then
             love.graphics.circle("fill", node:getPositionX(), node:getPositionY(), raioDoVertice, 25)
@@ -216,7 +216,7 @@ local function drawGraphEvent(graph)
    -- Desenha as arestas
    if edges ~= nil then
       while i <= #edges do
-         
+
          local edge = edges[i]
 
          love.graphics.setColor(0, 0, 0, 99) -- Black 99%
@@ -228,7 +228,7 @@ local function drawGraphEvent(graph)
             inclinacao = getInclinacaoAresta(edge)
             love.graphics.print(edge:getLabel(), (x1 + x2)/2 , (y1 + y2)/2  , inclinacao, escalaLetraAresta, escalaLetraAresta )
          end
-         
+
          i = i + 1
       end
    end
@@ -237,12 +237,12 @@ local function drawGraphEvent(graph)
 end
 
 --- Esta função verifica se algum vertice foi clicado pelo usuário e retorna este vertice.
-local function getNodeClicked() 
+local function getNodeClicked()
    -- Varrer todo o grafo procurando o vertice que pode ter sido clicado.
    nodes = NatDGraph:getNodes()
    for i=1, #nodes do
       x,y = nodes[i]:getPosition()
-      
+
       if (love.mouse.getX() <= x + raioDoVertice) and (love.mouse.getX() >= x - raioDoVertice) then
          if (love.mouse.getY() <= y + raioDoVertice) and (love.mouse.getY() >= y - raioDoVertice) then
             -- Este vertice foi clicado
@@ -268,7 +268,7 @@ local function proofStarted()
          end
       end
    end
-   
+
    return ret
 end
 
@@ -285,11 +285,11 @@ if proofStarted() then
 end
 
 local function inputFormula()
-   editingState = InputingFormula   
-  
+   editingState = InputingFormula
+
    text = "Type your formula or choose an example below: "
    input_formula = ""
-   
+
    NatDGraph = LogicModule.createGraphFromTable("empty")
    prepareGraphToDraw(NatDGraph)
 end
@@ -297,7 +297,7 @@ end
 local function runInput()
    local parsed_formula = parse_input(input_formula)
    t_formula = convert_formula_totable(parsed_formula)
-   
+
    local t_mimp_formula = implicational(t_formula)
    logger:info("inputFormula - alpha: "..convert_formula_tostring(t_mimp_formula))
    NatDGraph = LogicModule.createGraphFromTable(t_mimp_formula)
@@ -315,9 +315,9 @@ end
 local function runCommand()
    input_command = input_command:gsub("%(", "%(\"")
    input_command = input_command:gsub("%)", "\"%)")
-   input_command = input_command:gsub(",", "\",\"")      
-   input_command = input_command:gsub(",\" ", ",\"")   
-   
+   input_command = input_command:gsub(",", "\",\"")
+   input_command = input_command:gsub(",\" ", ",\"")
+
    loadstring(input_command)()
    NatDGraph = LogicModule.getGraph()
    prepareGraphToDraw(NatDGraph)
@@ -350,7 +350,7 @@ end
 -- LogicModule.expantImplyElimRule(grafo, nó selecionado para expansão)
 local function implyElimStep()
     if (nodeExpanding ~= nil) or (natDNode ~= nil) then
-        local ret, graph = LogicModule.expandImplyElimRule(NatDGraph, natDNode, hypothesisNode)           
+        local ret, graph = LogicModule.expandImplyElimRule(NatDGraph, natDNode, hypothesisNode)
         NatDGraph = prepareGraphToDraw(graph)
     end
 end
@@ -359,7 +359,7 @@ end
 -- LogicModule.expantImplyIntroRule(grafo, nó selecionado para expansão)
 local function implyIntroStep()
     if (nodeExpanding ~= nil) or (natDNode ~= nil) then
-        local ret, graph = LogicModule.expandImplyIntroRule(NatDGraph, natDNode)           
+        local ret, graph = LogicModule.expandImplyIntroRule(NatDGraph, natDNode)
         NatDGraph = prepareGraphToDraw(graph)
     end
 end
@@ -374,7 +374,7 @@ local function showInputTextEvent()
     font = love.graphics.newFont(12)
 
     love.graphics.setColor(0, 0, 255)
-    love.graphics.setFont(font)  
+    love.graphics.setFont(font)
     love.graphics.printf(text, 0, 0, love.graphics.getWidth())
 
 
@@ -396,8 +396,8 @@ local function expandAllButtonEvent()
    local yPos = 5
    local xLen = 55
    local yLen = 40
-   
-   if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then    
+
+   if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
       if love.mouse.isDown(leftMouseButton) then
          expandAll()
          love.timer.sleep(buttonTime)
@@ -421,9 +421,9 @@ local function inputFormulaButtonEvent()
    local xPos = windowWidth - 60
    local yPos = 50
    local xLen = 55
-   local yLen = 40  
-   
-   if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then     
+   local yLen = 40
+
+   if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
       if love.mouse.isDown(leftMouseButton) then
          inputFormula()
          love.timer.sleep(buttonTime)
@@ -450,7 +450,7 @@ local function printProofButtonEvent()
     local yLen = 40
     if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
         if love.mouse.isDown(leftMouseButton) then
-            printProof()                                   
+            printProof()
             love.timer.sleep(buttonTime)
         end
         love.graphics.setColor(100, 100, 200)
@@ -493,68 +493,7 @@ local function printProofDotButtonEvent()
     love.graphics.printf({{0, 0, 0}, printProofDotButtonName}, xPos, yPos + 5, xLen, "center")
 end
 
---[[ Para testes.
-local function implyElimStepButtonEvent()
-    local xPos = windowWidth - 60
-    local yPos = 140
-    local xLen = 55
-    local yLen = 40
-    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
-        if love.mouse.isDown(leftMouseButton) then
-            implyElimStep()                                   
-            love.timer.sleep(buttonTime)
-        end
-        love.graphics.setColor(100, 100, 200)
-    else
-        love.graphics.setColor(0, 100, 200)
-    end
-    love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
-    love.graphics.setColor(0, 0, 255)
-    love.graphics.setLineStyle("smooth")
-    love.graphics.line(xPos, yPos, xPos, yPos + yLen)
-    love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
-    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-    love.graphics.printf({{0, 0, 0}, "ImpElim Step"}, xPos, yPos + 5, xLen, "center")
-end
-
--- Para testes.
-local function implyIntroStepButtonEvent()
-    local xPos = windowWidth - 60
-    local yPos = 185
-    local xLen = 55
-    local yLen = 40
-    if love.mouse.getX() >= xPos and love.mouse.getX() <= xPos + xLen and love.mouse.getY() >= yPos and love.mouse.getY() <= yPos + yLen then
-        if love.mouse.isDown(leftMouseButton) then
-            implyIntroStep()                                   
-            love.timer.sleep(buttonTime)
-        end
-        love.graphics.setColor(100, 100, 200)
-    else
-        love.graphics.setColor(0, 100, 200)
-    end
-    love.graphics.rectangle("fill", xPos, yPos, xLen, yLen)
-    love.graphics.setColor(0, 0, 255)
-    love.graphics.setLineStyle("smooth")
-    love.graphics.line(xPos, yPos, xPos, yPos + yLen)
-    love.graphics.line(xPos, yPos + yLen, xPos + xLen, yPos + yLen)
-    love.graphics.setColor(255, 255, 255)
-    love.graphics.line(xPos + xLen, yPos, xPos + xLen, yPos + yLen)
-    love.graphics.line(xPos, yPos, xPos + xLen, yPos)
-    love.graphics.printf({{0, 0, 0}, "ImpIntro Step"}, xPos, yPos + 5, xLen, "center")
-end
-]]
-
---- Esta função é chamada pela love.draw.
--- A todo instante ela verifica se o botão esquerdo do mouse foi apertado. Em caso positivo 
--- conforme o botão continuar sendo pressionado e caso o clique tenha sido em um vertice esta função:
--- 1- Ira alterar a posição de desenho do vertice, criando o efeito do drag and drop, ou;
--- 2- Ira mover o screen todo, ou ;
--- 3- Ira indicar um Sequent como foco (se isExpandingFormula for verdadeiro) , ou;
--- 4- Ira chamar a funcao que expande o noh (segundo o calculo lohgico implementado), se 
--- o foco (no do tipo Sequent) estiver definido.
-local function dragNodeOrScreenOrSelectFocusEvent()     
+local function dragNodeOrScreenOrSelectFocusEvent()
 
     if love.mouse.isDown(leftMouseButton) then
 
@@ -562,7 +501,7 @@ local function dragNodeOrScreenOrSelectFocusEvent()
         nodeExpanding = getNodeClicked()
     end
 
-   if love.mouse.isDown(leftMouseButton) and not isDragging then            
+   if love.mouse.isDown(leftMouseButton) and not isDragging then
 
       nodeMoving = getNodeClicked()
       isDragging = true
@@ -571,38 +510,38 @@ local function dragNodeOrScreenOrSelectFocusEvent()
       yInitial = love.mouse.getY()
       -- Mudar o xInicial e o yInicial sempre que o mouse parar tb seria uma boa!
 
-      -- Vericia se o usuário quer arrastar a tela      
-   elseif not love.mouse.isDown(leftMouseButton) then                               
+      -- Vericia se o usuário quer arrastar a tela
+   elseif not love.mouse.isDown(leftMouseButton) then
       isDragging = false
       nodeMoving = "nao vazio"
-      
-      -- Usuario arrastando um vertice  
+
+      -- Usuario arrastando um vertice
    elseif nodeMoving ~= "nao vazio" and nodeMoving ~= nil then
       nodeMoving:setPosition(love.mouse.getX(), love.mouse.getY())
       --applyForces(NatDGraph)
-      
-    -- Usuario arrastando toda a tela 
-   elseif nodeMoving == nil then        
+
+    -- Usuario arrastando toda a tela
+   elseif nodeMoving == nil then
       nodes = NatDGraph:getNodes()
-      for i=1, #nodes do                        
+      for i=1, #nodes do
          x,y = nodes[i]:getPosition()
          deslocamentoX = math.abs(love.mouse.getX() - xInitial)/10
          deslocamentoY = math.abs(love.mouse.getY() - yInitial)/10
-         
+
          if love.mouse.getX() < xInitial then
             x = x - 5
          elseif love.mouse.getX() > xInitial then
             x = x + 5
          end
-         
+
          if love.mouse.getY() < yInitial then
             y = y - 5
          elseif love.mouse.getY() > yInitial then
-            y = y + 5                           
+            y = y + 5
          end
-         
+
          nodes[i]:setPosition(x, y)
-      end                               
+      end
    end
 end
 
@@ -618,7 +557,7 @@ function love.keypressed(key)
     elseif key == "p" and love.keyboard.isDown("lctrl") then
         printProof()
     elseif key == "t" and love.keyboard.isDown("lctrl") then
-        inputCommand()   
+        inputCommand()
     end
 
    if editingState == InputingFormula then
@@ -631,13 +570,13 @@ function love.keypressed(key)
          if tonumber(input_formula) then
             input_formula = formulas[tonumber(input_formula)]
          end
-         
+
          if input_formula ~= "" then
             local status, err = pcall(runInput)
             if not status then
                input_formula = err
-               text = "Type your formula or choose an example below: " .. input_formula            
-            end   
+               text = "Type your formula or choose an example below: " .. input_formula
+            end
          end
       end
    end
@@ -652,8 +591,8 @@ function love.keypressed(key)
          local status, err = pcall(runCommand)
          if not status then
             input_command = err
-            text = "Type your command: " .. input_command            
-         end         
+            text = "Type your command: " .. input_command
+         end
       end
    end
 end
@@ -668,7 +607,7 @@ function love.textinput(t)
    end
 end
 
-function love.load(arg)  
+function love.load(arg)
     -- Prepare to debug in ZeroBrain
     if arg[#arg] == "-debug" then
         require("mobdebug").start()
@@ -692,11 +631,11 @@ end
 function love.draw()
     showInputTextEvent()
     expandAllButtonEvent()
-    inputFormulaButtonEvent()  
+    inputFormulaButtonEvent()
     printProofButtonEvent()
-    printProofDotButtonEvent()      
+    printProofDotButtonEvent()
     drawGraphEvent(NatDGraph)
-    dragNodeOrScreenOrSelectFocusEvent()         
+    dragNodeOrScreenOrSelectFocusEvent()
 end
 
 function graph()

@@ -1,0 +1,2 @@
+((A1 imp (A2)) imp ((A1 imp (A2 imp (A3))) imp ((A2 imp (A3 imp (A4))) imp ((A3 imp (A4 imp (A5))) imp ((A4 imp (A5 imp (A6))) imp ((A5 imp (A6 imp (A7))) imp (A1 imp (A7))))))))
+((A1 imp (A2)) imp ((A1 imp (A2 imp (A3))) imp ((A2 imp (A3 imp (A4))) imp ((A3 imp (A4 imp (A5))) imp ((A4 imp (A5 imp (A6))) imp ((A5 imp (A6 imp (A7))) imp ((A6 imp (A7 imp (A8))) imp (A1 imp (A8)))))))))
