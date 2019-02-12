@@ -51,3 +51,7 @@ function os.showProofDotOnBrowser(nameSuffix)
     os.execute("dot -Tpng aux/prooftreeDot"..nameSuffix..".dot -o aux/prooftreeDot"..nameSuffix..".png")
 
 end
+
+function format_dot_files()
+    
+end

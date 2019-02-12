@@ -60,7 +60,7 @@ local function printFormula(formulaNode)
 	if (nodeLeft ~= nil) and (nodeRight ~= nil) then
 		local printLeft = printFormula(nodeLeft)
 		local printRight = printFormula(nodeRight)
-		ret = ret.."("..printLeft.." -> "..printRight..")"
+		ret = ret.."("..printLeft.."->"..printRight..")"
 
 	-- Verificação a fim de evitar imprimir o Label de um nó de Dedução (ImpIntro ou ImpElim).
 	elseif (#formulaNode:getLabel() >= 7) then
@@ -68,10 +68,10 @@ local function printFormula(formulaNode)
 			-- Nó atômico.
 			-- Vale notar que um nó atômico pode ter nós filhos, mas o único caso possível é
 			-- por uma aresta com label lblEdgeDed.."i", onde i vai de 1 ao número de deduções que partem do nó.
-			ret = ret.." "..formulaNode:getLabel().." "
+			ret = ret..formulaNode:getLabel()
 		end
 	else
-		ret = ret.." "..formulaNode:getLabel().." "
+		ret = ret..formulaNode:getLabel()
 	end
 
 	return ret
@@ -162,7 +162,7 @@ local function printProofStep(natDNode, file, previous)
 			if nodePred1:getInformation("DischargeIndexes") ~= nil then
 				for _, edge in ipairs(nodePred1:getEdgesIn()) do
 					if edge:getLabel() == lblEdgeHypothesis then
-						file:write("\""..currentNode.."\" -> \""..nodePred1:getInformation("DischargeIndexes")[j].."\" [color=green];\n")
+						file:write("\""..currentNode.."\" -> \""..nodePred1:getInformation("DischargeIndexes")[j].."\" [comment=discharge];\n")
 						j = j + 1
 					end
 				end
@@ -177,7 +177,7 @@ local function printProofStep(natDNode, file, previous)
 			if nodePred2:getInformation("DischargeIndexes") ~= nil then
 				for _, edge in ipairs(nodePred2:getEdgesIn()) do
 					if edge:getLabel() == lblEdgeHypothesis then
-						file:write("\""..currentNode.."\" -> \""..nodePred2:getInformation("DischargeIndexes")[j].."\" [color=green];\n")
+						file:write("\""..currentNode.."\" -> \""..nodePred2:getInformation("DischargeIndexes")[j].."\" [comment=discharge];\n")
 						j = j + 1
 					end
 				end
@@ -197,14 +197,14 @@ function PrintDotModule.printProofDot(agraph, nameSufix)
 
 	if nameSufix == nil then nameSufix = "" end
 
-	local file = io.open("aux/prooftreeDot"..nameSufix..".dot", "w")
+	local file = io.open("dot_files/prova_"..nameSufix..".dot", "w")
 	local ret = false
 
 	if agraph ~= nil then
 
 		local step = agraph:getNode(lblNodeGG):getEdgeOut(lblRootEdge):getDestino()
 
-		file:write("digraph prooftreeDot"..nameSufix.." {\n")
+		file:write("digraph "..nameSufix.." {\n")
 
 		currentNode = currentNode + 1
 		printProofStep(step, file, currentNode)
